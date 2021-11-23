@@ -22,7 +22,7 @@ typedef std::pair<double, std::pair<int,int>> pPair;
 typedef std::list<std::pair<int,int>> path;
 struct Node {
 
-    int x, y;
+    double x, y;
 
     int index;
 
@@ -250,16 +250,16 @@ double calculateHValue(int row, int col, int destX, int destY )
 {
     // Return using the distance formula
     return ((double)sqrt(
-        (row - dest.x()) * (row - dest.x())
-        + (col - dest.y()) * (col - dest.y())));
+        (row - destX) * (row - destX)
+        + (col - destY) * (col - destY)));
 }
 
 double calculateGValue(int row, int col, double g, int srcX, int srcY )
 {
     // Return using the distance formula
     return ((double)sqrt(
-        (row - src.x()) * (row - src.x())
-        + (col - src.y()) * (col - src.y()))+g);
+        (row - srcX) * (row - srcX)
+        + (col - srcY) * (col - srcY))+g);
 }
 
 path getPath(cell cellDetails[], Node dest){
@@ -269,14 +269,14 @@ path getPath(cell cellDetails[], Node dest){
     // std::list<pPair> Path;
     path Path;
 
-    while (cellDetails[ci].parent_node != dest) {
-        Path.push_back(std::make_pair(cellDetails[ci].x,cellDetails[ci].y));
-        int temp_ci = cellDetails[ci].parent_node;
+    while (!(cellDetails[ci].parent_node == dest)) {
+        Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
+        int temp_ci = cellDetails[ci].parent_node.index;
         // int temp_col = cellDetails[ci][ci]parent;
         ci = temp_ci;
         // col = temp_col;
     }
-    Path.push_back(std::make_pair(cellDetails[ci].x,cellDetails[ci].y));
+    Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
     // Path.push_back(std::make_pair(cellDetails[row][col].theta,Position(row, col)));
 
     return Path;
@@ -407,7 +407,7 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
     // Create a closed list and initialise it to false which
     // means that no cell has been included yet This closed
     // list is implemented as a boolean 2D array
-    bool closedList[nodeList.size()]
+    bool closedList[nodeList.size()];
     memset(closedList, false, sizeof(closedList));
  
     // Declare a 2D array of structure to hold the details
@@ -415,14 +415,14 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
     // cell cellDetails[gridLength][gridLength];
     cell cellDetails[nodeList.size()];
  
-    int i, j;
+    double i, j;
     // if (enableLogging){
     //     ROS_INFO("Before cell details setup");
     // }
-    for (i = 0; i <= nodeList.size(); i++) {
-            cellDetails[i].f = FLT_MAX;
-            cellDetails[i].g = FLT_MAX;
-            cellDetails[i].h = FLT_MAX;
+    for (int s = 0; s <= nodeList.size(); s++) {
+            cellDetails[s].f = FLT_MAX;
+            cellDetails[s].g = FLT_MAX;
+            cellDetails[s].h = FLT_MAX;
             // cellDetails[i].parent_i = -1;
             // cellDetails[i].parent_j = -1;
             // cellDetails[i].theta = 0;
@@ -469,7 +469,8 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
     // the destination is not reached.
     bool foundDest = false;
         
-    int xNew, yNew, iNew;
+    double xNew, yNew;
+    int iNew;
     double thetaNew;
     // double vMin{-2};
     // double vMax{10};
@@ -504,7 +505,7 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
             // if (isValid(xNew, yNew) == true) {
                 // If the destination cell is the same as the
                 // current successor
-                ROS_INFO_COND(enableLogging,"New Position x:%d y:%d", xNew, yNew);
+                ROS_INFO_COND(enableLogging,"New Position x:%f y:%f", xNew, yNew);
                 // if ((isDestination(xNew, yNew, dest) == true))
                 if (n == dest)
                 {
@@ -551,12 +552,10 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
                         cellDetails[iNew].parent_node = p;
                         cellDetails[iNew].node = n;
                         // cellDetails[xNew][yNew].theta = thetaNew;
-                        if (enableLogging){
-                            ROS_INFO("Add to openList x: %d y: %d", xNew, yNew);
-                        }
+                        ROS_INFO_COND(enableLogging,"Add to openList x: %f y: %f", xNew, yNew);
                     }
                 }
-            }
+            // }
         }        
     }
     // When the destination cell is not found and the open
@@ -566,7 +565,7 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
     // blockages)
     if (foundDest == false)
         ROS_INFO("Failed to find the Destination Cell\n");
-        ROS_INFO("Last Position x: %d y: %d", xNew, yNew);
+        ROS_INFO("Last Position x: %f y: %f", xNew, yNew);
 
     pathList = getPath(cellDetails, dest);
     return pathList;
@@ -657,8 +656,8 @@ class Vgraph {
           }
           vertices.push_back(p1);
           Node n;
-          n.x = p.x;
-          n.y = p.y;
+          n.x = p1.x;
+          n.y = p1.y;
           n.index = nodeIndex;
           nodeList.push_back(n);
           nodeIndex++;
@@ -695,6 +694,21 @@ class Vgraph {
       hull_verts.push_back(start_vector);
       hull_verts.push_back(goal_vector);
 
+      // Add start and Goal nodes to node list
+      Node startNode;
+      startNode.x = start_point.x;
+      startNode.y = start_point.y;
+      startNode.index = nodeIndex;
+      nodeList.push_back(startNode);
+      nodeIndex++;
+
+      Node goalNode;
+      goalNode.x = goal_point.x;
+      goalNode.y = goal_point.y;
+      goalNode.index = nodeIndex;
+      nodeList.push_back(goalNode);
+      nodeIndex++;
+
       std::vector<geometry_msgs::Point> temp;
       for(int i = 0; i < hull_verts.size() - 1; i++) {
         for (int j = i + 1; j < hull_verts.size(); j++) {
@@ -712,6 +726,7 @@ class Vgraph {
               if (flag == true) {
                 points.push_back(hull_verts[i][k]);
                 points.push_back(hull_verts[j][l]);
+                // Add node connectionList for each verticie
               }
             }
           }
@@ -720,6 +735,9 @@ class Vgraph {
       marker.points = points;
       marker_arr.markers.push_back(marker);
 
+      // Find A* path
+      path highLevelPath;
+      highLevelPath = AStarNodeMap(startNode, goalNode, nodeList);
       while (ros::ok) {
         marker_pub.publish(marker_arr);
       }
