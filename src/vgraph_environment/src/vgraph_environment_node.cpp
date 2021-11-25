@@ -19,7 +19,8 @@
 
 std::pair<int, int> p0;
 typedef std::pair<double, std::pair<int,int>> pPair;
-typedef std::list<std::pair<int,int>> path;
+typedef std::vector<std::pair<double,double>> path;
+// typedef std::vector<geometry_msgs::Point> path;
 struct Node {
 
     double x, y;
@@ -43,7 +44,7 @@ struct cell {
 
 };
 
-bool enableLogging = true;
+bool enableLogging = false;
 float normalize_angle(float angle) {
   float res = angle;
     while(res > PI) {
@@ -262,26 +263,6 @@ double calculateGValue(double row, double col, double g, double srcX, double src
         + (col - srcY) * (col - srcY))+g);
 }
 
-path getPath(cell cellDetails[], Node dest){
-    int row = dest.x;
-    int col = dest.y;
-    int ci = dest.index;
-    // std::list<pPair> Path;
-    path Path;
-
-    while (!(cellDetails[ci].parent_node == dest)) {
-        Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
-        int temp_ci = cellDetails[ci].parent_node.index;
-        // int temp_col = cellDetails[ci][ci]parent;
-        ci = temp_ci;
-        // col = temp_col;
-    }
-    Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
-    // Path.push_back(std::make_pair(cellDetails[row][col].theta,Position(row, col)));
-
-    return Path;
-}
-
 Node getNodeFromPos ( double x, double y, std::vector<Node> nodeList ){
     ROS_INFO_COND(enableLogging,"getNodeFromPos x: %f y: %f",x,y);
     Node p;
@@ -293,6 +274,79 @@ Node getNodeFromPos ( double x, double y, std::vector<Node> nodeList ){
     }
     return p;
     // throw;
+}
+
+path getPath(cell cellDetails[], Node dest, std::vector<Node> nodeList){
+    int row = dest.x;
+    int col = dest.y;
+    int ci = dest.index;
+    Node tempNode;
+    tempNode = dest;
+    // std::list<pPair> Path;
+    path Path;
+    // getNodeFromPos()
+    ROS_INFO("getPath x: %f y: %f i: %d",cellDetails[ci].node.x,cellDetails[ci].node.y, ci);
+    while (!(cellDetails[ci].parent_node == tempNode)) {
+        // geometry_msgs::Point pathPoint;
+        // pathPoint.x = cellDetails[ci].node.x;
+        // pathPoint.y = cellDetails[ci].node.y;
+        // pathPoint.z = 0;
+        ROS_INFO("getPath x: %f y: %f i: %d",cellDetails[ci].node.x,cellDetails[ci].node.y, ci);
+        Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
+        // Path.push_back(pathPoint);
+        int temp_ci = cellDetails[ci].parent_node.index;
+        // int temp_col = cellDetails[ci][ci]parent;
+        ci = temp_ci;
+        tempNode = getNodeFromPos(cellDetails[ci].node.x,cellDetails[ci].node.y, nodeList);
+        // col = temp_col;
+    }
+    // geometry_msgs::Point pathPoint;
+    // pathPoint.x = cellDetails[ci].node.x;
+    // pathPoint.y = cellDetails[ci].node.y;
+    // pathPoint.z = 0;
+    // Path.push_back(pathPoint);
+    Path.push_back(std::make_pair(cellDetails[ci].node.x,cellDetails[ci].node.y));
+    // Path.push_back(std::make_pair(cellDetails[row][col].theta,Position(row, col)));
+
+    return Path;
+}
+
+// Covert path list to pairs for marker line list
+std::vector<geometry_msgs::Point> getMarkerPoints ( path pathList, double scaleFactor ){
+  ROS_INFO("getMarkerPoints");
+  std::vector<geometry_msgs::Point> pointsArray;
+  // geometry_msgs::Point p1;
+  // p1.z = 0;
+  // geometry_msgs::Point p2;
+  // p2.z = 0;
+  ROS_INFO("Get path size");
+  int n = (pathList.size())-1;
+  // for (std::pair<int,int> p : pathList ){
+  ROS_INFO("path size %d",n);
+  // for (int i = 0; i<n; i++)
+  int g;
+  ROS_INFO("Start for loop");
+  for (g = 0; g<n; g++){
+  // for (g = 0; g < n; g++) {
+    ROS_INFO("Pairs");
+    ROS_INFO("Pair %d", g);
+    geometry_msgs::Point p1;
+    p1.x = pathList[g].first;
+    p1.y = pathList[g].second;
+    p1.z = 0;
+    ROS_INFO("Point p1 x: %f y: %f", p1.x, p1.y);
+    pointsArray.push_back(p1);
+
+    geometry_msgs::Point p2;
+    p2.x = pathList[g+1].first;
+    p2.y = pathList[g+1].second;
+    p2.z = 0;
+    ROS_INFO("Point p2 x: %f y: %f", p2.x, p2.y);
+    pointsArray.push_back(p2);
+
+  }
+  std::reverse(pointsArray.begin(),pointsArray.end());
+  return pointsArray;
 }
 
 std::vector<Node> replaceNodeInList(Node n, std::vector<Node> nodeList ){
@@ -545,7 +599,8 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
 
             xNew = n.x;
             yNew = n.y;
-            iNew = n.index;
+            Node newNode = getNodeFromPos(xNew, yNew, nodeList );
+            iNew = newNode.index;
             // if (isValid(xNew, yNew) == true) {
             // If the destination cell is the same as the
             // current successor
@@ -553,13 +608,15 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
             // if ((isDestination(xNew, yNew, dest) == true))
             if (n == dest)
             {
+                // Node parentNode = getNodeFromPos(i, j, nodeList );
                 // Set the Parent of the destination cell
-                cellDetails[iNew].parent_node = n;
+                cellDetails[iNew].parent_node = p;
+                cellDetails[iNew].node = newNode;
                 // cellDetails[iNew].parent_j = j;
                 ROS_INFO("The destination cell is found\n");
                 // tracePath(cellDetails, dest);
                 foundDest = true;
-                pathList = getPath(cellDetails, dest);
+                pathList = getPath(cellDetails, dest, nodeList);
                 return pathList;
             }
             // If the successor is already on the closed
@@ -615,7 +672,7 @@ path AStarNodeMap( Node src, Node dest, std::vector<Node> nodeList ){
         ROS_INFO("Failed to find the Destination Cell\n");
         ROS_INFO("Last Position x: %f y: %f", xNew, yNew);
 
-    pathList = getPath(cellDetails, dest);
+    pathList = getPath(cellDetails, dest, nodeList);
     return pathList;
 }
 
@@ -625,6 +682,7 @@ class Vgraph {
       ros::init(argc, argv, "vgraph_environment");
       ros::NodeHandle n;
       ros::Publisher marker_pub = n.advertise<visualization_msgs::MarkerArray>("vgraph_markerarr", 10);
+      ros::Publisher markerPath_pub = n.advertise<visualization_msgs::MarkerArray>("vgraph_marker_patharr", 10);
       // ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
       ros::Rate loop_rate(30);
 
@@ -802,10 +860,10 @@ class Vgraph {
       for ( unsigned i = 0; i < points.size(); i+=2){
         geometry_msgs::Point p1 = points.at(i);
         geometry_msgs::Point p2 = points.at(i+1);
-        ROS_INFO("Add node connections");
+        ROS_INFO_COND(enableLogging,"Add node connections");
         Node n1 = getNodeFromPos(p1.x, p1.y, nodeList );
         Node n2 = getNodeFromPos(p2.x, p2.y, nodeList );
-        ROS_INFO("Add node connectionsList");
+        ROS_INFO_COND(enableLogging,"Add node connectionsList");
         // if (std::count(n1.connectionList.begin(), n1.connectionList.end(), n2) == 0){
         Node nn1 {n1};
         nn1.connectionList.push_back(n2);
@@ -830,8 +888,18 @@ class Vgraph {
       Node dst = getNodeFromPos(goalNode.x, goalNode.y, nodeList );
       outputAllNodes( nodeList );
       highLevelPath = AStarNodeMap(src, dst, nodeList);
+      std::vector<geometry_msgs::Point> highLevelPoint = getMarkerPoints(highLevelPath, scale_factor);
+      // Add marker of path to Rviz
+      visualization_msgs::Marker highLevelMarker = init_marker(marker_id, visualization_msgs::Marker::LINE_LIST);
+      visualization_msgs::MarkerArray path_arr;
+      highLevelMarker.color.g=0.0;
+      highLevelMarker.color.r=1.0;
+      highLevelMarker.points = highLevelPoint;
+      path_arr.markers.push_back(highLevelMarker);
+      ROS_INFO("Publish markers");
       while (ros::ok) {
         marker_pub.publish(marker_arr);
+        markerPath_pub.publish(path_arr);
       }
 
 
