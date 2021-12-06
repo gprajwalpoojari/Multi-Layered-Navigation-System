@@ -9,6 +9,7 @@
 #include "visualization_msgs/Marker.h"
 #include "visualization_msgs/MarkerArray.h"
 #include "AStar/AStar.hpp"
+#include <ros/package.h>
 
 #include<iostream>
 #include<fstream>
@@ -344,14 +345,23 @@ class Vgraph {
       //         ros::Duration(1.0).sleep();
       //     }
       // }
-
+      ROS_INFO("Start");
+      std::string rospath = ros::package::getPath("vgraph_environment");
+      ROS_INFO("Ros Path: %s",rospath.c_str());
       float scale_factor = 100;
-      std::string object_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/obstacles.txt";
+      std::string object_path = rospath+"/src/obstacles.txt";
+      ROS_INFO("parse object1");
+      // std::string object_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/obstacles.txt";
       std::vector<std::vector<std::pair<int, int>>> obstacles = load_obstacles(object_path);
+      ROS_INFO("parse object2");
+
 
       std::vector<std::vector<std::pair<int, int>>> grown_obstacles = grow_obstacles(obstacles);
 
-      std::string goal_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/goal.txt";
+      std::string goal_path = rospath+"/src/goal.txt";
+
+      ROS_INFO("parse goal: %s",goal_path.c_str());
+      // std::string goal_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/goal.txt";
       std::pair<int, int> goal = load_goal(goal_path);
       std::pair<int, int> start {-200,0};
 
