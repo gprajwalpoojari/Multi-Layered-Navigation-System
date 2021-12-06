@@ -289,8 +289,7 @@ int main() {
     // // first argument: name of the window
     // // second argument: image to be shown(Mat object)
    cv::imshow("Obstacle_Map", img);
-  //  cv::imwrite("/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/map/Obstacle_Map.png", img);
-   cv::imwrite("/home/chris/git/Multi_Layer_Motion_Planning/src/vgraph_environment/map/Obstacle_Map.png", img);
+   cv::imwrite("/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/map/Obstacle_Map.png", img);
     //
    cv::waitKey(0); //wait infinite time for a keypress
     //

@@ -8,7 +8,6 @@ Panels:
         - /Status1
         - /MarkerArray1
         - /Map1
-        - /PathArray1
       Splitter Ratio: 0.5
     Tree Height: 416
   - Class: rviz/Selection
@@ -72,14 +71,6 @@ Visualization Manager:
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /vgraph_marker_patharr
-      Name: PathArray
-      Namespaces:
-        ns1: true
-      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
