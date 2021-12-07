@@ -85,6 +85,7 @@ class AStar {
                 if (u == this->goal) {
                     ROS_INFO("Path found. Tracing Path...");
                     this->trace_path();
+                    return;
                 }
             }
             if (this->pq.empty()){
