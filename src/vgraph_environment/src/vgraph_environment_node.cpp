@@ -314,6 +314,42 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    return vertices;
 }
 
+void animate_robot ( std::vector<geometry_msgs::Point> robotPath, visualization_msgs::Marker m, visualization_msgs::MarkerArray marker_arr, ros::Publisher pub ){
+
+    pub.publish(m);
+    ros::Duration duration(.25);
+    tf2::Quaternion q_mark;
+    while (markerPublisher_.getNumSubscribers() < 1)
+    {
+        ROS_WARN_ONCE("Please create a subscriber to the marker");
+        duration.sleep();
+    }
+    for ( geometry_msgs::Point p: robotPath ){
+        // Position p = Path.back().second;
+        // double theta = Path.back().first;
+        // q_mark.setRPY(0, 0, theta);
+        // q_mark.normalize();
+
+        // ROS_INFO("Point (%f,%f) theta: %f", p.x(), p.y(), theta);
+        m.pose.position.x = p.x;
+        m.pose.position.y = p.y;
+        // m.pose.orientation.x = q_mark[0];
+        // m.pose.orientation.y = q_mark[1];
+        // m.pose.orientation.z = q_mark[2];
+        // m.pose.orientation.w = q_mark[3];
+
+        duration.sleep();
+
+        marker_arr.markers.push_back(m);
+        pub.publish(marker_arr);
+
+    }
+    duration.sleep();
+    publish();
+    return;
+
+}
+
 class Vgraph {
   public :
     Vgraph(int argc, char** argv) {
@@ -537,11 +573,12 @@ class Vgraph {
       path_marker_1.points = pose;
       marker_arr.markers.push_back(path_marker_1);
 
-
-      while (ros::ok) {
-        marker_pub.publish(marker_arr);
-      }
-
+      // while (ros::ok) {
+      marker_pub.publish(marker_arr);
+      // }
+      visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
+      marker_id ++;
+      animate_robot ( robotPath, m, marker_arr, marker_pub );
 
   //     float this->linear_speed = 0.15;
   //     float this->angular_speed = 0.5;
