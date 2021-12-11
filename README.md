@@ -6,11 +6,20 @@ ROS Melodic on Ubuntu 18.04
 ## Instructions
 1. Setup package in ROS environment, or setup packas as your ROS environment
    1. TODO
-2. cd into your environment and Build the environment with `catkin_make`
-3. Source your environment with `source devel/setup.bash`
-4. Run the ROS package with `roslaunch vgraph_environment vgraph_environment.launch`
+2. Make sure the packages under "Main Dependent ROS packages" are installed
+3. cd into your environment and Build the environment with `catkin_make`
+4. Source your environment with `source devel/setup.bash`
+5. Run the ROS package with `roslaunch vgraph_environment vgraph_environment.launch`
 
-## Dependent ROS packages for "vgraph_environment"
+## Main Dependent ROS packages for "vgraph_environment"
+- rospy
+- roscpp
+- catkin
+- visualization_msgs
+- turtlebot3_fake
+
+## All Dependent ROS packages for "vgraph_environment"
+
 cpp_common
 rostime
 roscpp_traits
