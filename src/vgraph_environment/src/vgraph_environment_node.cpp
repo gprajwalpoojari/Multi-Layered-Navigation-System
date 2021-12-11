@@ -314,7 +314,10 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    return vertices;
 }
 
-void animate_robot ( std::vector<geometry_msgs::Point> robotPath, visualization_msgs::Marker m, visualization_msgs::MarkerArray marker_arr, ros::Publisher pub ){
+void animate_robot ( std::vector<std::pair<geometry_msgs::Point,double>> robotPath, 
+                     visualization_msgs::Marker m, 
+                     visualization_msgs::MarkerArray marker_arr, 
+                     ros::Publisher pub ){
 
     pub.publish(m);
     ros::Duration duration(.25);
@@ -324,19 +327,22 @@ void animate_robot ( std::vector<geometry_msgs::Point> robotPath, visualization_
         ROS_WARN_ONCE("Please create a subscriber to the marker");
         duration.sleep();
     }
-    for ( geometry_msgs::Point p: robotPath ){
-        // Position p = Path.back().second;
-        // double theta = Path.back().first;
-        // q_mark.setRPY(0, 0, theta);
-        // q_mark.normalize();
+    // pair<point, double (rad)>
+    for (int i = 0; i < robotPath.size(); i++){
 
-        // ROS_INFO("Point (%f,%f) theta: %f", p.x(), p.y(), theta);
+        geometry_msgs::point p = robotPath[i].first;
+        double theta = robotPath[i].second;
+        tf2::Quaternion q_mark;
+        ROS_INFO("Point (%f,%f) theta: %f", p.x, p.y, theta);
         m.pose.position.x = p.x;
         m.pose.position.y = p.y;
-        // m.pose.orientation.x = q_mark[0];
-        // m.pose.orientation.y = q_mark[1];
-        // m.pose.orientation.z = q_mark[2];
-        // m.pose.orientation.w = q_mark[3];
+        m.pose.position.z = p.z;
+        q_mark.setRPY(0, 0, theta);
+        q_mark.normalize();
+        m.pose.orientation.x = q_mark[0];
+        m.pose.orientation.y = q_mark[1];
+        m.pose.orientation.z = q_mark[2];
+        m.pose.orientation.w = q_mark[3];
 
         duration.sleep();
 
