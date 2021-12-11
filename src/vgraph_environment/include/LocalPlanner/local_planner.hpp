@@ -57,6 +57,10 @@ private:
     geometry_msgs::Point from;
     geometry_msgs::Point to;
 
+    // std::vector<double> U_l;
+    // std::vector<double> U_r; 
+    // double rob_wheel_rad;
+
 
 public:
     Local_Planner(std::vector<geometry_msgs::Point> global_path,  /*std::vector<geometry_msgs::Point> vert_list,*/ std::vector<std::vector<geometry_msgs::Point>> hull_verts, /*double threshold = 10 ,*/ double robot_length = 0.36)
@@ -65,6 +69,11 @@ public:
                     this->U_s = {-0.1, 0.1};
                     this->Theta = {-45, 0, 45}; 
                     this->delta_t = 1;    
+
+                    // this->rob_wheel_rad = 0.033;   // 33mm
+                    // this->U_l = {-0.1, 0, 0.1};
+                    // this->U_r = {-0.1, 0, 0.1};
+
                 }
 
     double degree_to_rad(double angle_degree)
@@ -161,6 +170,12 @@ public:
                 double theta_next =  theta_curr + (u_s*tan(this->degree_to_rad(theta))/this->robot_length)* this->delta_t ;
                 double x_next = x_curr + (u_s*cos(theta_next))*this->delta_t;
                 double y_next = y_curr + (u_s*sin(theta_next))*this->delta_t;
+                 
+                // double theta_next = theta_curr + (u_l - u_r)*(this->rob_wheel_rad/this->robot_length)*this->delta_t;
+                // double x_next = x_curr + (this->rob_wheel_rad/2)*(u_l+u_r)*cos(theta_next)*this->delta_t;
+                // double y_next = y_curr + (this->rob_wheel_rad/2)*(u_l+u_r)*sin(theta_next)*this->delta_t;
+
+
                 // std::cout<<"x "<<x_next<< " y "<<y_next<<std::endl;
                 geometry_msgs::Point point;
                 point.x = x_next;
@@ -176,6 +191,7 @@ public:
                     // std::cout<<status<<std::endl;
                     if (status) {
                         std::cout << "Collision!"<<std::endl;
+                        std::cout << this->robot.get_center() << std::endl;
                         // std::cout << robot.get_center()<<std::endl;
                         // std::vector<geometry_msgs::Point> corners = robot.get_corners();
                         // for (auto i : corners){
@@ -189,11 +205,11 @@ public:
                 {
                     robot_state possible_state = std::make_pair(point, theta_next);
                     this->robot.update_robot_pose(point, theta_next);
-                    std::vector<geometry_msgs::Point> corners = this->robot.get_corners();
-                        for (auto i : corners){
-                            std::cout <<i.x << " " << i.y <<std::endl;
-                        }
-                    std::cout<< "Next" << std::endl;
+                    // std::vector<geometry_msgs::Point> corners = this->robot.get_corners();
+                    //     for (auto i : corners){
+                    //         std::cout <<i.x << " " << i.y <<std::endl;
+                    //     }
+                    // std::cout<< "Next" << std::endl;
                     
                     double heuristic = this->calc_heuristic();    // possible_state (arg)
                     // std::cout<<"h "<< heuristic<<std::endl;
