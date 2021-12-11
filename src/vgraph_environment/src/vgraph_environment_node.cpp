@@ -497,6 +497,8 @@ class Vgraph {
       path_marker.points = final_path;
       marker_arr.markers.push_back(path_marker);
 
+    hull_verts.pop_back();
+    hull_verts.pop_back();
     Local_Planner local_planner(final_path, hull_verts);
     // std::cout<<"Helloworld1" << std::endl;
     std::vector<robot_state> path = local_planner.get_path();

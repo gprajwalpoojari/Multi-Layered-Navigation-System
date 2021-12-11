@@ -63,7 +63,7 @@ public:
                 : global_path{global_path}, /*vert_list{vert_list}, threshold{threshold},*/  hull_verts{hull_verts}, robot_length{robot_length}, robot(global_path[0], 0, robot_length/2)
                 {
                     this->U_s = {-0.1, 0.1};
-                    this->Theta = {-30, 0, 30}; 
+                    this->Theta = {-45, 0, 45}; 
                     this->delta_t = 1;    
                 }
 
@@ -139,7 +139,7 @@ public:
         double U_final;
         double U_att = this->get_attractive_potential();
         double U_rep = this->get_repulsive_potential();
-        std::cout<<"a "<<U_att<<" r "<<U_rep<<std::endl;
+        // std::cout<<"a "<<U_att<<" r "<<U_rep<<std::endl;
         U_final = U_att + U_rep;
         return U_final;
     }
@@ -168,16 +168,33 @@ public:
                 point.z = 0;
                 this->robot.update_robot_pose(point, theta_next);
                 bool status = false;
+                // int count = 0;
                 for (auto obstacle : hull_verts)
-                {
+                {   
+                    // std::cout << count << std::endl;
                     status = this->robot.check_collision(obstacle);
                     // std::cout<<status<<std::endl;
-                    if (status) break;
-                    
+                    if (status) {
+                        std::cout << "Collision!"<<std::endl;
+                        // std::cout << robot.get_center()<<std::endl;
+                        // std::vector<geometry_msgs::Point> corners = robot.get_corners();
+                        // for (auto i : corners){
+                        //     std::cout <<i.x << " " << i.y <<std::endl;
+                        // }
+                        break;
+                    }
+                    // count++;
                 }
                 if (status == false)
                 {
                     robot_state possible_state = std::make_pair(point, theta_next);
+                    this->robot.update_robot_pose(point, theta_next);
+                    std::vector<geometry_msgs::Point> corners = this->robot.get_corners();
+                        for (auto i : corners){
+                            std::cout <<i.x << " " << i.y <<std::endl;
+                        }
+                    std::cout<< "Next" << std::endl;
+                    
                     double heuristic = this->calc_heuristic();    // possible_state (arg)
                     // std::cout<<"h "<< heuristic<<std::endl;
                     pq_data_type data = std::make_pair(heuristic, possible_state);
@@ -201,8 +218,8 @@ public:
         robot_state current_state = std::make_pair(this->from, theta_curr);
         std::vector<robot_state> path_points;
         path_points.push_back(current_state);
-        while (this->euc_dist(current_state.first, this->to) > 0.5) {
-            std::cout<<"c "<<current_state.first.x<<" "<<current_state.first.y<<std::endl;
+        while (this->euc_dist(current_state.first, this->to) > 0.4) {
+            // std::cout<<"c "<<current_state.first.x<<" "<<current_state.first.y<<std::endl;
             pq_type possible_states = this->get_possible_states(current_state);
 
             // std::cout<< possible_states.size()<<std::endl;
@@ -211,11 +228,11 @@ public:
             robot_state next_best_state = heuristic_state_pair.second;
             path_points.push_back(next_best_state);
             current_state = next_best_state;
-            while (!possible_states.empty()) {
-                pq_data_type temp = possible_states.top();
-                possible_states.pop();
-                std::cout<<temp.first << " " << temp.second.first.x << " "<<temp.second.first.y<< std::endl;
-            }
+            // while (!possible_states.empty()) {
+            //     pq_data_type temp = possible_states.top();
+            //     possible_states.pop();
+            //     std::cout<<temp.first << " " << temp.second.first.x << " "<<temp.second.first.y<< std::endl;
+            // }
         }
         std::cout<<"Done" <<std::endl;
         this->to = current_state.first;

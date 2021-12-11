@@ -55,13 +55,18 @@ public:
     }
 
     void translate()
-    {
-        for(auto point : this->robot_final_points)
+    {  
+        //  std::cout << this->center << std::endl;
+        for(auto &point : this->robot_final_points)
         {
             point.x = point.x + this->center.x;
             point.y = point.y + this->center.y;
-            point.z = point.x + this->center.z;
+            point.z = point.z + this->center.z;
+            // std::cout << point << std::endl;
         }
+        // for (auto i : this->robot_final_points) {
+        //     std::cout << i << std::endl;
+        // }
     }
 
     geometry_msgs::Point get_center(){
@@ -75,12 +80,20 @@ public:
     double get_radius(){
         return this->radius;
     }
+
+    std::vector<geometry_msgs::Point> get_corners(){
+        return this->robot_final_points;
+    }
     void update_robot_pose(geometry_msgs::Point center, double orientation)
     {
         this->center = center;
         this->orientation = orientation;
         this->rotate();
         this->translate();
+        // for (auto i : this->robot_final_points) {
+        //     std::cout << i << std::endl;
+        // }
+        // std::cout << "Next" << std::endl;
     }
 
     std::vector<geometry_msgs::Point> get_robot_polygon()
@@ -103,14 +116,24 @@ public:
     bool check_collision(std::vector<geometry_msgs::Point> obstacle)
     {
         std::vector<std::vector<geometry_msgs::Point>> polygon = {obstacle, this->robot_final_points};
-    
+        // std::cout << "Robot" << std::endl;
+        // for (auto i : this->robot_final_points) {
+        //     std::cout<< i.x << " " << i.y <<std::endl;
+        // }
+        // std::cout << "obstacle" << std::endl;
+        // for (auto i : obstacle) {
+        //     std::cout << i.x << " " << i.y << std::endl;
+        // }
+        // std::cout << "Center" << std::endl;
+        // std::cout << this->center << std::endl;
+        // std::cout << " Next " << std::endl;
         bool COLLISION = false;
         //polygon collision algorithm
         for (int i = 0; i < polygon[0].size(); i++){
             for (int j = 0; j < polygon[1].size(); j++){
             bool probability[2] = {false}, exception[2] = {false};
             std::vector<std::pair<geometry_msgs::Point, geometry_msgs::Point>> line(2);
-            int a = (i==polygon[0].size() - 1)? 0 : i;
+            int a = (i==polygon[0].size() - 1)? 0 : i+1;
 
             line[0] = std::make_pair(polygon[0][i],polygon[0][a]);
             line[1] = std::make_pair(polygon[1][i],polygon[1][a]);
