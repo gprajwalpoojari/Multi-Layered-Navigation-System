@@ -76,5 +76,22 @@
         "locale": "cpp",
         "queue": "cpp",
         "stack": "cpp"
-    }
+    },
+    "python.autoComplete.extraPaths": [
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/webots_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/image_transport_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/simulation_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/webots_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/image_transport_ws/devel/lib/python2.7/dist-packages",
+        "/home/dhruv/simulation_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "C_Cpp.errorSquiggles": "Disabled"
 }

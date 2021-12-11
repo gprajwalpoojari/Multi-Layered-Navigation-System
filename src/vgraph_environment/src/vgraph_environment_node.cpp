@@ -10,6 +10,7 @@
 #include "visualization_msgs/MarkerArray.h"
 #include "AStar/AStar.hpp"
 #include <ros/package.h>
+#include "LocalPlanner/local_planner.hpp"
 
 #include<iostream>
 #include<fstream>
@@ -480,6 +481,12 @@ class Vgraph {
       // astar.show_connectivity();
       astar.calculate_path();
       std::vector<geometry_msgs::Point> final_path = astar.get_final_path();
+    //   for (auto i : final_path){
+    //     std::cout<<i.x << " ";
+    //     std::cout<< i.y << " ";
+    //     std::cout<< i.z<<std::endl;
+    // }
+      //  std::cout<<"Helloworld1" << std::endl;
       visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
       marker_id ++;
       // visualization_msgs::MarkerArray path;
@@ -489,6 +496,34 @@ class Vgraph {
       path_marker.color.b = 0;
       path_marker.points = final_path;
       marker_arr.markers.push_back(path_marker);
+
+    Local_Planner local_planner(final_path, hull_verts);
+    // std::cout<<"Helloworld1" << std::endl;
+    std::vector<robot_state> path = local_planner.get_path();
+    // std::cout << path.size()<<std::endl;
+    // for (auto i : path){
+    //   std::cout<<i.first.x << " ";
+    //   std::cout<< i.first.y << " ";
+    //   std::cout<< i.first.z<<std::endl;
+    // }
+    // std::cout<<"Helloworld"<<std::endl;
+    std::vector<geometry_msgs::Point> pose;
+    for(auto state : path)
+    {
+      pose.push_back(state.first);
+    }
+
+    visualization_msgs::Marker path_marker_1 = init_marker(marker_id, visualization_msgs::Marker::POINTS);
+      marker_id ++;
+      // visualization_msgs::MarkerArray path;
+      path_marker_1.scale.x = 0.05;
+      path_marker_1.color.r = 0;
+      path_marker_1.color.g = 0;
+      path_marker_1.color.b = 1;
+      path_marker_1.points = pose;
+      marker_arr.markers.push_back(path_marker_1);
+
+
       while (ros::ok) {
         marker_pub.publish(marker_arr);
       }

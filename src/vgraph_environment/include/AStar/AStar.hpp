@@ -53,7 +53,7 @@ class AStar {
                 goal_index = previous[goal_index];
                 this->final_path.push_back(this->vertex_list[goal_index]);
             }
-            this->final_path.push_back(this->vertex_list[goal_index]);
+            // this->final_path.push_back(this->vertex_list[goal_index]);
             reverse(this->final_path.begin(), this->final_path.end());
         }
 

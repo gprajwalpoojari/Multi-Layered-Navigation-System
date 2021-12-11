@@ -12,7 +12,7 @@ private:
     geometry_msgs::Point center;
     double orientation;
     double radius;
-    std::vector<geometry_msgs::Point> inital_points; 
+    std::vector<geometry_msgs::Point> initial_points; 
     std::vector<geometry_msgs::Point> robot_final_points;
 
 public:
@@ -36,12 +36,12 @@ public:
             p4.y = this->radius;
             p4.z = 0;
 
-            this->inital_points = {p1, p2, p3, p4};
+            this->initial_points = {p1, p2, p3, p4};
         }
 
     void rotate()
     {
-        for(int i=0; i<this->initial_points.size(), i++)
+        for(int i=0; i<this->initial_points.size(); i++)
         {
             geometry_msgs::Point point = this->initial_points[i];
             double x = cos(this->orientation)*point.x - sin(this->orientation)*point.y;
@@ -64,6 +64,17 @@ public:
         }
     }
 
+    geometry_msgs::Point get_center(){
+        return this->center;
+    }
+
+    double get_orientation(){
+        return this->orientation;
+    }
+
+    double get_radius(){
+        return this->radius;
+    }
     void update_robot_pose(geometry_msgs::Point center, double orientation)
     {
         this->center = center;
@@ -74,7 +85,7 @@ public:
 
     std::vector<geometry_msgs::Point> get_robot_polygon()
     {
-        return this->final_robot_points;
+        return this->robot_final_points;
     }
 
     double cross_product(std::pair<geometry_msgs::Point, geometry_msgs::Point> line, geometry_msgs::Point point)
