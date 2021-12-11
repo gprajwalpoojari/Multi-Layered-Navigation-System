@@ -314,17 +314,17 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    return vertices;
 }
 
-void animate_robot ( std::vector<std::pair<geometry_msgs::Point,double>> robotPath, 
+void animate_robot ( std::vector<robot_state> robotPath, 
                      ros::Publisher pub ){
-
+    ROS_INFO("Animate turtlebot");
     // pub.publish(m);
     ros::Duration duration(.25);
     // tf2::Quaternion q_mark;
-    while (pub.getNumSubscribers() < 1)
-    {
-        ROS_WARN_ONCE("Please create a subscriber to the marker");
-        duration.sleep();
-    }
+    // while (pub.getNumSubscribers() < 1)
+    // {
+    //     ROS_WARN_ONCE("Please create a subscriber to the marker");
+    //     duration.sleep();
+    // }
     // pair<point, double (rad)>
     geometry_msgs::Point p1;
     geometry_msgs::Point p2;
@@ -359,7 +359,7 @@ void animate_robot ( std::vector<std::pair<geometry_msgs::Point,double>> robotPa
         move_cmd.linear.x = lineSpeed;
         move_cmd.angular.z = thetaSpeed;
         // tf2::Quaternion q_mark;
-        // ROS_INFO("Point (%f,%f) theta: %f", p.x, p.y, theta);
+        ROS_INFO("Point (%f,%f) theta: %f", p1.x, p1.y, theta1 );
         // m.pose.position.x = p.x;
         // m.pose.position.y = p.y;
         // m.pose.position.z = p.z;
@@ -420,22 +420,22 @@ class Vgraph {
       //     }
       // }
       ROS_INFO("Start");
-      // std::string rospath = ros::package::getPath("vgraph_environment");
-      // ROS_INFO("Ros Path: %s",rospath.c_str());
+      std::string rospath = ros::package::getPath("vgraph_environment");
+      ROS_INFO("Ros Path: %s",rospath.c_str());
       float scale_factor = 100;
-      // std::string object_path = rospath+"/src/obstacles.txt";
+      std::string object_path = rospath+"/src/obstacles.txt";
       // ROS_INFO("parse object1");
-      std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
+      // std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
       std::vector<std::vector<std::pair<int, int>>> obstacles = load_obstacles(object_path);
       ROS_INFO("parse object2");
 
 
       std::vector<std::vector<std::pair<int, int>>> grown_obstacles = grow_obstacles(obstacles);
 
-      // std::string goal_path = rospath+"/src/goal.txt";
+      std::string goal_path = rospath+"/src/goal.txt";
 
       // ROS_INFO("parse goal: %s",goal_path.c_str());
-      std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
+      // std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
       std::pair<int, int> goal = load_goal(goal_path);
       std::pair<int, int> start {-200,0};
 
@@ -616,7 +616,7 @@ class Vgraph {
       // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
       // marker_id ++;
       // Animate turtlebot
-      // animate_robot ( robotPath, cmd_vel );
+      animate_robot ( path, cmd_vel );
 
   //     float this->linear_speed = 0.15;
   //     float this->angular_speed = 0.5;
