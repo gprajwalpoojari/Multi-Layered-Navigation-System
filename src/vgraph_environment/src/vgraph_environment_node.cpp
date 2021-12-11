@@ -315,43 +315,74 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
 }
 
 void animate_robot ( std::vector<std::pair<geometry_msgs::Point,double>> robotPath, 
-                     visualization_msgs::Marker m, 
-                     visualization_msgs::MarkerArray marker_arr, 
                      ros::Publisher pub ){
 
-    pub.publish(m);
+    // pub.publish(m);
     ros::Duration duration(.25);
-    tf2::Quaternion q_mark;
-    while (markerPublisher_.getNumSubscribers() < 1)
+    // tf2::Quaternion q_mark;
+    while (pub.getNumSubscribers() < 1)
     {
         ROS_WARN_ONCE("Please create a subscriber to the marker");
         duration.sleep();
     }
     // pair<point, double (rad)>
-    for (int i = 0; i < robotPath.size(); i++){
+    geometry_msgs::Point p1;
+    geometry_msgs::Point p2;
+    geometry_msgs::Twist move_cmd;
+    double theta1;
+    double theta2;
+    
+    double xSpeed;
+    double ySpeed;
+    double zSpeed;
+    double lineSpeed;
+    double thetaSpeed;
 
-        geometry_msgs::point p = robotPath[i].first;
-        double theta = robotPath[i].second;
-        tf2::Quaternion q_mark;
-        ROS_INFO("Point (%f,%f) theta: %f", p.x, p.y, theta);
-        m.pose.position.x = p.x;
-        m.pose.position.y = p.y;
-        m.pose.position.z = p.z;
-        q_mark.setRPY(0, 0, theta);
-        q_mark.normalize();
-        m.pose.orientation.x = q_mark[0];
-        m.pose.orientation.y = q_mark[1];
-        m.pose.orientation.z = q_mark[2];
-        m.pose.orientation.w = q_mark[3];
+    double delta_T = 1;
+
+    p1 = robotPath[0].first;
+    theta1 = robotPath[0].second;
+
+    for (int i = 1; i < robotPath.size(); i++){
+
+        p2 = robotPath[i].first;
+        theta2 = robotPath[i].second;
+
+        xSpeed = (p2.x-p1.x)/delta_T;
+        ySpeed = (p2.y-p1.y)/delta_T;
+        zSpeed = (p2.z-p1.z)/delta_T;
+        double x_diff = p2.x - p1.x;
+        double y_diff = p2.y - p1.y;
+        lineSpeed = (sqrt(pow(x_diff, 2) + pow(y_diff, 2)));
+        thetaSpeed = (theta2 - theta1)/delta_T;
+
+        move_cmd.linear.x = lineSpeed;
+        move_cmd.angular.z = thetaSpeed;
+        // tf2::Quaternion q_mark;
+        // ROS_INFO("Point (%f,%f) theta: %f", p.x, p.y, theta);
+        // m.pose.position.x = p.x;
+        // m.pose.position.y = p.y;
+        // m.pose.position.z = p.z;
+        // q_mark.setRPY(0, 0, theta);
+        // q_mark.normalize();
+        // m.pose.orientation.x = q_mark[0];
+        // m.pose.orientation.y = q_mark[1];
+        // m.pose.orientation.z = q_mark[2];
+        // m.pose.orientation.w = q_mark[3];
 
         duration.sleep();
 
-        marker_arr.markers.push_back(m);
-        pub.publish(marker_arr);
+        // marker_arr.markers.push_back(m);
+        // pub.publish(marker_arr);
+        pub.publish(move_cmd);
+
+        // Move point 2 to point 1
+        p1 = p2;
+        theta1 = theta2;
 
     }
     duration.sleep();
-    publish();
+    // publish();
     return;
 
 }
@@ -362,7 +393,7 @@ class Vgraph {
       ros::init(argc, argv, "vgraph_environment");
       ros::NodeHandle n;
       ros::Publisher marker_pub = n.advertise<visualization_msgs::MarkerArray>("vgraph_markerarr", 10);
-      // ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
+      ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
       ros::Rate loop_rate(30);
 
       // tf::TransformListener this->tf_listener;
@@ -582,9 +613,10 @@ class Vgraph {
       // while (ros::ok) {
       marker_pub.publish(marker_arr);
       // }
-      visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
-      marker_id ++;
-      animate_robot ( robotPath, m, marker_arr, marker_pub );
+      // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
+      // marker_id ++;
+      // Animate turtlebot
+      // animate_robot ( robotPath, cmd_vel );
 
   //     float this->linear_speed = 0.15;
   //     float this->angular_speed = 0.5;

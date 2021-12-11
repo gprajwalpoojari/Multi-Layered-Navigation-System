@@ -1,6 +1,6 @@
 <launch>
   <!-- Bringup a fake turtlebot robot -->
-  <!-- <include file="$(find turtlebot3_fake)/launch/turtlebot3_fake.launch" /> -->
+  <include file="$(find turtlebot3_fake)/launch/turtlebot3_fake.launch" />
 
   <!-- Start a move_base node -->
   <!-- <include file="$(find rbx1_nav)/launch/fake_move_base_obstacle.launch" /> -->
