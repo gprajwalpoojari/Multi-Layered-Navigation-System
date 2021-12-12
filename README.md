@@ -14,6 +14,7 @@ ROS Melodic on Ubuntu 18.04
 ## Main Dependent ROS packages for "vgraph_environment"
 - rospy
 - roscpp
+- roslib
 - catkin
 - visualization_msgs
 - turtlebot3_fake

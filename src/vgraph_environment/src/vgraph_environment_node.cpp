@@ -2,7 +2,7 @@
 #include <visualization_msgs/Marker.h>
 
 #include "ros/ros.h"
-// #include "tf"
+#include <tf/transform_listener.h>
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/Quaternion.h"
@@ -396,29 +396,30 @@ class Vgraph {
       ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
       ros::Rate loop_rate(30);
 
-      // tf::TransformListener this->tf_listener;
+      tf::TransformListener tf_listener;
       // loop_rate.sleep(2);
       //
-      // this->odom_frame = "/odom";
-      // tf::StampedTransform transform;
-      // try
-      // {
-      //     this->tf_listener.lookupTransform(this->odom_frame, "/base_footprint",ros::Time(0), transform);
-      //     this->base_frame = '/base_footprint';
-      // }
-      // catch(tf::TransformException ex)
-      // {
-      //     try
-      //     {
-      //         this->tf_listener.lookupTransform(this->odom_frame, "/base_link",ros::Time(0), transform);
-      //         this->base_frame = '/base_link';
-      //     }
-      //     catch(tf::TransformException ex)
-      //     {
-      //         ROS_ERROR("%s",ex.what());
-      //         ros::Duration(1.0).sleep();
-      //     }
-      // }
+      std::string odom_frame = "/odom";
+      std::string base_frame;
+      tf::StampedTransform transform;
+      try
+      {
+          tf_listener.lookupTransform(odom_frame, "/base_footprint",ros::Time(0), transform);
+          base_frame = "/base_footprint";
+      }
+      catch(tf::TransformException ex)
+      {
+          try
+          {
+              tf_listener.lookupTransform(odom_frame, "/base_link",ros::Time(0), transform);
+              base_frame = "/base_link";
+          }
+          catch(tf::TransformException ex)
+          {
+              ROS_ERROR("%s",ex.what());
+              ros::Duration(1.0).sleep();
+          }
+      }
       ROS_INFO("Start");
       std::string rospath = ros::package::getPath("vgraph_environment");
       ROS_INFO("Ros Path: %s",rospath.c_str());
