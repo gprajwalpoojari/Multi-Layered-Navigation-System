@@ -612,7 +612,7 @@ class Vgraph {
       marker_arr.markers.push_back(path_marker_1);
 
       // while (ros::ok) {
-      ros::Duration(1.0).sleep();
+      ros::Duration(2.0).sleep();
       marker_pub.publish(marker_arr);
       // }
       // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
