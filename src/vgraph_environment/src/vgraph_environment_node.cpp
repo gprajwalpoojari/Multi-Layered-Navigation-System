@@ -313,12 +313,83 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    }
    return vertices;
 }
+// tf::StampedTransform get_odom(tf::TransformListener tf_listener, 
+//                               std::string odom_frame, 
+//                               std::string base_frame)
+// {
+//       tf::StampedTransform transform;
+//       // try
+//       // {
+//       tf_listener.lookupTransform(odom_frame, base_frame,ros::Time(0), transform);
+//       // }
+//       return transform;
+//   }
+
+// void translate( double goal_distance,
+//                 tf::TransformListener tf_listener, 
+//                 std::string odom_frame, 
+//                 std::string base_frame,
+//                 ros::Publisher pub,
+//                 double linear_speed)
+// {
+//       geometry_msgs::Twist move_cmd;
+//       tf::StampedTransform transform;
+//       move_cmd.linear.x = linear_speed;
+//       // need to call get_odom function. Currently assuming we got position and rotation value.
+//       transform = get_odom(tf_listener, odom_frame, base_frame);
+//       double x_start = transform.getOrigin().x();
+//       double y_start = transform.getOrigin().y();
+//       double distance = 0;
+//       ros::Duration duration(.5);
+//       while(distance < goal_distance)
+//       {
+//           pub.publish(move_cmd);
+//           duration.sleep();
+
+//           transform = get_odom(tf_listener, odom_frame, base_frame);
+//           // need to call get_odom function. Currently assuming we got position and rotation value.
+//           distance = sqrt(pow(position.x- transform.getOrigin().x(), 2) + pow(transform.getOrigin().y()- y_start, 2))
+//       }
+//       move_cmd.linear.x = 0;
+//       pub.publish(move_cmd);
+//       ros::Duration(1.0).sleep();
+//       // loop_rate.sleep();
+  
+//   }
+  //
+  // void rotate(goal_angle)
+  // {
+  //     geometry_msgs::Twist move_cmd;
+  //     move_cmd.angular.z = this->angular_speed;
+  //     if(goal_angle > 0)
+  //     {
+  //         this->angular_speed = -(this->angular_speed);
+  //     }
+  //
+  //     // need to call get_odom function. Currently assuming we got position and rotation value.
+  //     float last_angle = rotation;
+  //     float turn_angle = 0;
+  //     while(abs(turn_angle + this->angular_tolerance) < abs(goal_angle))
+  //     {
+  //         this->cmd_vel.publish(move_cmd);
+  //         // need to call get_odom function. Currently assuming we got position and rotation value.
+  //         float delta_angle = normalize(rotation - last_angle);
+  //         turn_angle = turn_angle + delta_angle;
+  //         last_angle = rotation;
+  //
+  //     }
+  //     move_cmd.angular.z = 0;
+  //     this->cmd_vel.publish(move_cmd);
+  //     loop_rate.sleep();
+  //
+  //
+  // }
+  //
 
 void animate_robot ( std::vector<robot_state> robotPath, 
                      ros::Publisher pub ){
     ROS_INFO("Animate turtlebot");
     // pub.publish(m);
-    ros::Duration duration(.25);
     // tf2::Quaternion q_mark;
     // while (pub.getNumSubscribers() < 1)
     // {
@@ -337,8 +408,11 @@ void animate_robot ( std::vector<robot_state> robotPath,
     double zSpeed;
     double lineSpeed;
     double thetaSpeed;
-
-    double delta_T = 1;
+    double linear_speed = 0.15;
+    double angular_speed = 0.5;
+    double angular_tolerance = .1;
+    double delta_T = .5;
+    ros::Duration duration(delta_T);
 
     p1 = robotPath[0].first;
     theta1 = robotPath[0].second;
@@ -353,13 +427,15 @@ void animate_robot ( std::vector<robot_state> robotPath,
         zSpeed = (p2.z-p1.z)/delta_T;
         double x_diff = p2.x - p1.x;
         double y_diff = p2.y - p1.y;
-        lineSpeed = (sqrt(pow(x_diff, 2) + pow(y_diff, 2)));
+        lineSpeed = (sqrt(pow(x_diff, 2) + pow(y_diff, 2)))/delta_T;
         thetaSpeed = (theta2 - theta1)/delta_T;
 
         move_cmd.linear.x = lineSpeed;
         move_cmd.angular.z = thetaSpeed;
         // tf2::Quaternion q_mark;
         ROS_INFO("Point (%f,%f) theta: %f", p1.x, p1.y, theta1 );
+        // tf::StampedTransform transform;
+        // tf_listener.lookupTransform(odom_frame, base_frame,ros::Time(0), transform);
         // m.pose.position.x = p.x;
         // m.pose.position.y = p.y;
         // m.pose.position.z = p.z;
@@ -627,62 +703,7 @@ class Vgraph {
   //
   // }
   //
-  // void translate(goal_distance)
-  // {
-  //     geometry_msgs::Twist move_cmd;
-  //     move_cmd.linear.x = this->linear_speed;
-  //     // need to call get_odom function. Currently assuming we got position and rotation value.
-  //     float x_start = position.x;
-  //     float y_start = position.y;
-  //     float distance = 0;
-  //     while(distance < goal_distance)
-  //     {
-  //         this->cmd_vel.publish(move_cmd);
-  //         // need to call get_odom function. Currently assuming we got position and rotation value.
-  //         distance = sqrt(pow(position.x- x_start, 2) + pow(position.y- y_start, 2))
-  //     }
-  //     move_cmd.linear.x = 0;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  //
-  // }
-  //
-  // void rotate(goal_angle)
-  // {
-  //     geometry_msgs::Twist move_cmd;
-  //     move_cmd.angular.z = this->angular_speed;
-  //     if(goal_angle > 0)
-  //     {
-  //         this->angular_speed = -(this->angular_speed);
-  //     }
-  //
-  //     // need to call get_odom function. Currently assuming we got position and rotation value.
-  //     float last_angle = rotation;
-  //     float turn_angle = 0;
-  //     while(abs(turn_angle + this->angular_tolerance) < abs(goal_angle))
-  //     {
-  //         this->cmd_vel.publish(move_cmd);
-  //         // need to call get_odom function. Currently assuming we got position and rotation value.
-  //         float delta_angle = normalize(rotation - last_angle);
-  //         turn_angle = turn_angle + delta_angle;
-  //         last_angle = rotation;
-  //
-  //     }
-  //     move_cmd.angular.z = 0;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  //
-  //
-  // }
-  //
-  // void get_odom()
-  // {
-  //     geometry_msgs::Point
-  //     try
-  //     {
-  //         this->tf_listener.lookupTransform(this->odom_frame, this->base_frame,ros::Time(0), transform); // Not  able to figure what will be the output of this line. Need to figure something for that.
-  //     }
-  // }
+
   //
   // void shutdown()
   // {
