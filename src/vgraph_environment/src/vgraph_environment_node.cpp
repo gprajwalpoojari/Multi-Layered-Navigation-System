@@ -464,12 +464,12 @@ class Vgraph {
                 int end_index = get_serialized_index(hull_verts, j, l);
                 connectivity[start_index].push_back(end_index);
                 connectivity[end_index].push_back(start_index);
-                if (i < hull_verts[i].size() - 2) {
-                int z = (j==hull_verts[i].size()-3) ? 0 : k+1;
-                end_index = get_serialized_index(hull_verts, i, z);
-                connectivity[start_index].push_back(end_index);
-                connectivity[end_index].push_back(start_index); 
-                }
+                // if (i < hull_verts[i].size() - 2) {
+                // int z = (j==hull_verts[i].size()-3) ? 0 : k+1;
+                // end_index = get_serialized_index(hull_verts, i, z);
+                // connectivity[start_index].push_back(end_index);
+                // connectivity[end_index].push_back(start_index); 
+                // }
                 
 
               }
@@ -477,32 +477,33 @@ class Vgraph {
           }
         }
       }
+      for (int i = 0; i < hull_verts.size() - 2; i++) {
+        for (int j = 0; j < hull_verts[i].size(); j++) {
+          int k = (j == hull_verts[i].size() - 1) ? 0 : j+1;
+          int start_index = get_serialized_index(hull_verts, i, j);
+          int end_index = get_serialized_index(hull_verts, i, k);
+          connectivity[start_index].push_back(end_index);
+          connectivity[end_index].push_back(start_index); 
+        }
+      }
       marker.points = points;
-      // marker_arr.markers.push_back(marker);
+      marker_arr.markers.push_back(marker);
 
  
 
 //Global Planner - AStar Algorithm
 
       AStar astar(start_point, goal_point, vertex_list, connectivity);
-      // astar.show_connectivity();
       astar.calculate_path();
       std::vector<geometry_msgs::Point> final_path = astar.get_final_path();
-    //   for (auto i : final_path){
-    //     std::cout<<i.x << " ";
-    //     std::cout<< i.y << " ";
-    //     std::cout<< i.z<<std::endl;
-    // }
-      //  std::cout<<"Helloworld1" << std::endl;
-      // visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
-      // marker_id ++;
-      // // visualization_msgs::MarkerArray path;
-      // path_marker.scale.x = 0.05;
-      // path_marker.color.r = 1;
-      // path_marker.color.g = 0;
-      // path_marker.color.b = 0;
-      // path_marker.points = final_path;
-      // marker_arr.markers.push_back(path_marker);
+      visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
+      marker_id ++;
+      path_marker.scale.x = 0.05;
+      path_marker.color.r = 1;
+      path_marker.color.g = 0;
+      path_marker.color.b = 0;
+      path_marker.points = final_path;
+      marker_arr.markers.push_back(path_marker);
 
     hull_verts.pop_back();
     hull_verts.pop_back();
@@ -519,15 +520,7 @@ class Vgraph {
 
     }
     Local_Planner local_planner(final_path, obstacles_new_type);
-    // std::cout<<"Helloworld1" << std::endl;
     std::vector<robot_state> path = local_planner.get_path();
-    // std::cout << path.size()<<std::endl;
-    // for (auto i : path){
-    //   std::cout<<i.first.x << " ";
-    //   std::cout<< i.first.y << " ";
-    //   std::cout<< i.first.z<<std::endl;
-    // }
-    // std::cout<<"Helloworld"<<std::endl;
     std::vector<geometry_msgs::Point> pose;
     for(auto state : path)
     {
