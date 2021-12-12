@@ -313,17 +313,18 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    }
    return vertices;
 }
-// tf::StampedTransform get_odom(tf::TransformListener tf_listener, 
-//                               std::string odom_frame, 
-//                               std::string base_frame)
-// {
-//       tf::StampedTransform transform;
-//       // try
-//       // {
-//       tf_listener.lookupTransform(odom_frame, base_frame,ros::Time(0), transform);
-//       // }
-//       return transform;
-//   }
+tf::StampedTransform get_odom(
+                              std::string odom_frame, 
+                              std::string base_frame)
+{
+      tf::StampedTransform transform;
+      tf::TransformListener tf_listener;
+      // try
+      // {
+      tf_listener.lookupTransform(base_frame,odom_frame, ros::Time(0), transform);
+      // }
+      return transform;
+  }
 
 // void translate( double goal_distance,
 //                 tf::TransformListener tf_listener, 
@@ -387,7 +388,9 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
   //
 
 void animate_robot ( std::vector<robot_state> robotPath, 
-                     ros::Publisher pub ){
+                     ros::Publisher pub,
+                     std::string odom_frame, 
+                     std::string base_frame){
     ROS_INFO("Animate turtlebot");
     // pub.publish(m);
     // tf2::Quaternion q_mark;
@@ -411,8 +414,10 @@ void animate_robot ( std::vector<robot_state> robotPath,
     double linear_speed = 0.15;
     double angular_speed = 0.5;
     double angular_tolerance = .1;
-    double delta_T = .5;
+    double delta_T = .25;
     ros::Duration duration(delta_T);
+
+    tf::TransformListener tf_listener;
 
     p1 = robotPath[0].first;
     theta1 = robotPath[0].second;
@@ -446,15 +451,22 @@ void animate_robot ( std::vector<robot_state> robotPath,
         // m.pose.orientation.z = q_mark[2];
         // m.pose.orientation.w = q_mark[3];
 
-        duration.sleep();
 
         // marker_arr.markers.push_back(m);
         // pub.publish(marker_arr);
         pub.publish(move_cmd);
-
+        duration.sleep();
+        // tf::StampedTransform transform;
+        // transform = get_odom( odom_frame, base_frame);
         // Move point 2 to point 1
         p1 = p2;
         theta1 = theta2;
+
+        // Update with real position
+        // p1.x = transform.getOrigin().x();
+        // p1.y = transform.getOrigin().y();
+
+        // theta1 = 
 
     }
     duration.sleep();
@@ -694,7 +706,7 @@ class Vgraph {
       // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
       // marker_id ++;
       // Animate turtlebot
-      animate_robot ( path, cmd_vel );
+      animate_robot ( path, cmd_vel, odom_frame, base_frame );
 
   //     float this->linear_speed = 0.15;
   //     float this->angular_speed = 0.5;
