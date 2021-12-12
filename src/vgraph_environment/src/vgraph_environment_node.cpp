@@ -89,7 +89,7 @@ std::pair<int, int> load_goal(std::string goal_path) { // parsing the goal.txt f
 std::vector<std::vector<std::pair<int, int>>> grow_obstacles (std::vector<std::vector<std::pair<int, int>>> obstacles){
 
     std::vector<std::vector<std::pair<int, int>>> grown_obstacles(obstacles.size());
-    int aabb_sidelen = 36;
+    int aabb_sidelen = 55;
     int half = aabb_sidelen / 2;
 
     for (int o = 0; o < obstacles.size(); o++){
@@ -464,6 +464,13 @@ class Vgraph {
                 int end_index = get_serialized_index(hull_verts, j, l);
                 connectivity[start_index].push_back(end_index);
                 connectivity[end_index].push_back(start_index);
+                if (i < hull_verts[i].size() - 2) {
+                int z = (j==hull_verts[i].size()-3) ? 0 : k+1;
+                end_index = get_serialized_index(hull_verts, i, z);
+                connectivity[start_index].push_back(end_index);
+                connectivity[end_index].push_back(start_index); 
+                }
+                
 
               }
             }
@@ -471,7 +478,7 @@ class Vgraph {
         }
       }
       marker.points = points;
-      marker_arr.markers.push_back(marker);
+      // marker_arr.markers.push_back(marker);
 
  
 
@@ -487,19 +494,31 @@ class Vgraph {
     //     std::cout<< i.z<<std::endl;
     // }
       //  std::cout<<"Helloworld1" << std::endl;
-      visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
-      marker_id ++;
-      // visualization_msgs::MarkerArray path;
-      path_marker.scale.x = 0.05;
-      path_marker.color.r = 1;
-      path_marker.color.g = 0;
-      path_marker.color.b = 0;
-      path_marker.points = final_path;
-      marker_arr.markers.push_back(path_marker);
+      // visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
+      // marker_id ++;
+      // // visualization_msgs::MarkerArray path;
+      // path_marker.scale.x = 0.05;
+      // path_marker.color.r = 1;
+      // path_marker.color.g = 0;
+      // path_marker.color.b = 0;
+      // path_marker.points = final_path;
+      // marker_arr.markers.push_back(path_marker);
 
     hull_verts.pop_back();
     hull_verts.pop_back();
-    Local_Planner local_planner(final_path, hull_verts);
+
+    std::vector<std::vector<geometry_msgs::Point>> obstacles_new_type(hull_verts.size());
+    for (int i = 0; i < obstacles.size(); i++){
+      for (int j = 0; j < obstacles[i].size(); j++) {
+        geometry_msgs::Point new_pt;
+        new_pt.x = obstacles[i][j].first;
+        new_pt.y = obstacles[i][j].second;
+        new_pt.z = 0;
+        obstacles_new_type[i].push_back(new_pt);
+      }
+
+    }
+    Local_Planner local_planner(final_path, obstacles_new_type);
     // std::cout<<"Helloworld1" << std::endl;
     std::vector<robot_state> path = local_planner.get_path();
     // std::cout << path.size()<<std::endl;
