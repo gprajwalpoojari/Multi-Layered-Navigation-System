@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   roslib
   visualization_msgs
+  turtlebot3_fake
 )
 
 ## System dependencies are found with CMake's conventions

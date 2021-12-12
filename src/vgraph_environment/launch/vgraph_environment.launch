@@ -1,6 +1,19 @@
 <launch>
   <!-- Bringup a fake turtlebot robot -->
   <!-- <include file="$(find turtlebot3_fake)/launch/turtlebot3_fake.launch" /> -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+
+  <param name="tb3_model" value="$(arg model)"/>
+
+  <include file="$(find turtlebot3_bringup)/launch/includes/description.launch.xml">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node pkg="turtlebot3_fake" type="turtlebot3_fake_node" name="turtlebot3_fake_node" output="screen" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
 
   <!-- Start a move_base node -->
   <!-- <include file="$(find rbx1_nav)/launch/fake_move_base_obstacle.launch" /> -->
@@ -9,7 +22,7 @@
   <node name="map_server" pkg="map_server" type="map_server" args="$(find vgraph_environment)/map/map.yaml"/>
 
   <!-- Run a static transform between /odom and /map -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" /> -->
+  <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="-2 0 0 0 0 0 /map /odom 100" />
 
   <!-- Start RViz -->
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find vgraph_environment)/world.rviz" />

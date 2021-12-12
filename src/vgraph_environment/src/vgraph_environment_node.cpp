@@ -2,7 +2,7 @@
 #include <visualization_msgs/Marker.h>
 
 #include "ros/ros.h"
-// #include "tf"
+#include <tf/transform_listener.h>
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/Quaternion.h"
@@ -313,6 +313,167 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    }
    return vertices;
 }
+tf::StampedTransform get_odom(
+                              std::string odom_frame, 
+                              std::string base_frame)
+{
+      tf::StampedTransform transform;
+      tf::TransformListener tf_listener;
+      // try
+      // {
+      tf_listener.lookupTransform(odom_frame,base_frame, ros::Time(0), transform);
+      // }
+      return transform;
+  }
+
+// void translate( double goal_distance,
+//                 tf::TransformListener tf_listener, 
+//                 std::string odom_frame, 
+//                 std::string base_frame,
+//                 ros::Publisher pub,
+//                 double linear_speed)
+// {
+//       geometry_msgs::Twist move_cmd;
+//       tf::StampedTransform transform;
+//       move_cmd.linear.x = linear_speed;
+//       // need to call get_odom function. Currently assuming we got position and rotation value.
+//       transform = get_odom(tf_listener, odom_frame, base_frame);
+//       double x_start = transform.getOrigin().x();
+//       double y_start = transform.getOrigin().y();
+//       double distance = 0;
+//       ros::Duration duration(.5);
+//       while(distance < goal_distance)
+//       {
+//           pub.publish(move_cmd);
+//           duration.sleep();
+
+//           transform = get_odom(tf_listener, odom_frame, base_frame);
+//           // need to call get_odom function. Currently assuming we got position and rotation value.
+//           distance = sqrt(pow(position.x- transform.getOrigin().x(), 2) + pow(transform.getOrigin().y()- y_start, 2))
+//       }
+//       move_cmd.linear.x = 0;
+//       pub.publish(move_cmd);
+//       ros::Duration(1.0).sleep();
+//       // loop_rate.sleep();
+  
+//   }
+  //
+  // void rotate(goal_angle)
+  // {
+  //     geometry_msgs::Twist move_cmd;
+  //     move_cmd.angular.z = this->angular_speed;
+  //     if(goal_angle > 0)
+  //     {
+  //         this->angular_speed = -(this->angular_speed);
+  //     }
+  //
+  //     // need to call get_odom function. Currently assuming we got position and rotation value.
+  //     float last_angle = rotation;
+  //     float turn_angle = 0;
+  //     while(abs(turn_angle + this->angular_tolerance) < abs(goal_angle))
+  //     {
+  //         this->cmd_vel.publish(move_cmd);
+  //         // need to call get_odom function. Currently assuming we got position and rotation value.
+  //         float delta_angle = normalize(rotation - last_angle);
+  //         turn_angle = turn_angle + delta_angle;
+  //         last_angle = rotation;
+  //
+  //     }
+  //     move_cmd.angular.z = 0;
+  //     this->cmd_vel.publish(move_cmd);
+  //     loop_rate.sleep();
+  //
+  //
+  // }
+  //
+
+void animate_robot ( std::vector<robot_state> robotPath, 
+                     ros::Publisher pub,
+                     std::string odom_frame, 
+                     std::string base_frame){
+    ROS_INFO("Animate turtlebot");
+    // pub.publish(m);
+    // tf2::Quaternion q_mark;
+    // while (pub.getNumSubscribers() < 1)
+    // {
+    //     ROS_WARN_ONCE("Please create a subscriber to the marker");
+    //     duration.sleep();
+    // }
+    // pair<point, double (rad)>
+    geometry_msgs::Point p1;
+    geometry_msgs::Point p2;
+    geometry_msgs::Twist move_cmd;
+    double theta1;
+    double theta2;
+    
+    double xSpeed;
+    double ySpeed;
+    double zSpeed;
+    double lineSpeed;
+    double thetaSpeed;
+    double linear_speed = 0.15;
+    double angular_speed = 0.5;
+    double angular_tolerance = .1;
+    double delta_T = .25;
+    ros::Duration duration(delta_T);
+
+    tf::TransformListener tf_listener;
+
+    p1 = robotPath[0].first;
+    theta1 = robotPath[0].second;
+
+    for (int i = 1; i < robotPath.size(); i++){
+
+        p2 = robotPath[i].first;
+        theta2 = robotPath[i].second;
+
+        xSpeed = (p2.x-p1.x)/delta_T;
+        ySpeed = (p2.y-p1.y)/delta_T;
+        zSpeed = (p2.z-p1.z)/delta_T;
+        double x_diff = p2.x - p1.x;
+        double y_diff = p2.y - p1.y;
+        lineSpeed = (sqrt(pow(x_diff, 2) + pow(y_diff, 2)))/delta_T;
+        thetaSpeed = (theta2 - theta1)/delta_T;
+
+        move_cmd.linear.x = lineSpeed;
+        move_cmd.angular.z = thetaSpeed;
+        // tf2::Quaternion q_mark;
+        ROS_INFO("Point (%f,%f) theta: %f", p1.x, p1.y, theta1 );
+        // tf::StampedTransform transform;
+        // tf_listener.lookupTransform(odom_frame, base_frame,ros::Time(0), transform);
+        // m.pose.position.x = p.x;
+        // m.pose.position.y = p.y;
+        // m.pose.position.z = p.z;
+        // q_mark.setRPY(0, 0, theta);
+        // q_mark.normalize();
+        // m.pose.orientation.x = q_mark[0];
+        // m.pose.orientation.y = q_mark[1];
+        // m.pose.orientation.z = q_mark[2];
+        // m.pose.orientation.w = q_mark[3];
+
+
+        // marker_arr.markers.push_back(m);
+        // pub.publish(marker_arr);
+        pub.publish(move_cmd);
+        duration.sleep();
+        // tf::StampedTransform transform;
+        // transform = get_odom( odom_frame, base_frame);
+        // Move point 2 to point 1
+        p1 = p2;
+        theta1 = theta2;
+
+        // Update with real position
+        // p1.x = transform.getOrigin().x();
+        // p1.y = transform.getOrigin().y();
+
+        // theta1 = 
+
+    }
+    duration.sleep();
+    // publish();
+    return;
+
+}
 
 class Vgraph {
   public :
@@ -320,49 +481,52 @@ class Vgraph {
       ros::init(argc, argv, "vgraph_environment");
       ros::NodeHandle n;
       ros::Publisher marker_pub = n.advertise<visualization_msgs::MarkerArray>("vgraph_markerarr", 10);
-      // ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
+      ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
       ros::Rate loop_rate(30);
 
-      // tf::TransformListener this->tf_listener;
+      tf::TransformListener tf_listener;
       // loop_rate.sleep(2);
       //
-      // this->odom_frame = "/odom";
-      // tf::StampedTransform transform;
-      // try
-      // {
-      //     this->tf_listener.lookupTransform(this->odom_frame, "/base_footprint",ros::Time(0), transform);
-      //     this->base_frame = '/base_footprint';
-      // }
-      // catch(tf::TransformException ex)
-      // {
-      //     try
-      //     {
-      //         this->tf_listener.lookupTransform(this->odom_frame, "/base_link",ros::Time(0), transform);
-      //         this->base_frame = '/base_link';
-      //     }
-      //     catch(tf::TransformException ex)
-      //     {
-      //         ROS_ERROR("%s",ex.what());
-      //         ros::Duration(1.0).sleep();
-      //     }
-      // }
+      std::string odom_frame = "/odom";
+      std::string base_frame;
+      tf::StampedTransform transform;
+      try
+      {
+          tf_listener.lookupTransform(odom_frame, "/base_footprint",ros::Time(0), transform);
+          base_frame = "/base_footprint";
+      }
+      catch(tf::TransformException ex)
+      {
+          try
+          {
+              tf_listener.lookupTransform(odom_frame, "/base_link",ros::Time(0), transform);
+              base_frame = "/base_link";
+          }
+          catch(tf::TransformException ex)
+          {
+              ROS_ERROR("%s",ex.what());
+              ros::Duration(1.0).sleep();
+              base_frame = "/base_link";
+          }
+      }
+      
       ROS_INFO("Start");
-      // std::string rospath = ros::package::getPath("vgraph_environment");
-      // ROS_INFO("Ros Path: %s",rospath.c_str());
+      std::string rospath = ros::package::getPath("vgraph_environment");
+      ROS_INFO("Ros Path: %s",rospath.c_str());
       float scale_factor = 100;
-      // std::string object_path = rospath+"/src/obstacles.txt";
+      std::string object_path = rospath+"/src/obstacles.txt";
       // ROS_INFO("parse object1");
-      std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
+      // std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
       std::vector<std::vector<std::pair<int, int>>> obstacles = load_obstacles(object_path);
       ROS_INFO("parse object2");
 
 
       std::vector<std::vector<std::pair<int, int>>> grown_obstacles = grow_obstacles(obstacles);
 
-      // std::string goal_path = rospath+"/src/goal.txt";
+      std::string goal_path = rospath+"/src/goal.txt";
 
       // ROS_INFO("parse goal: %s",goal_path.c_str());
-      std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
+      // std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
       std::pair<int, int> goal = load_goal(goal_path);
       std::pair<int, int> start {-200,0};
 
@@ -537,11 +701,14 @@ class Vgraph {
       path_marker_1.points = pose;
       marker_arr.markers.push_back(path_marker_1);
 
-
-      while (ros::ok) {
-        marker_pub.publish(marker_arr);
-      }
-
+      // while (ros::ok) {
+      ros::Duration(2.0).sleep();
+      marker_pub.publish(marker_arr);
+      // }
+      // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
+      // marker_id ++;
+      // Animate turtlebot
+      animate_robot ( path, cmd_vel, odom_frame, base_frame );
 
   //     float this->linear_speed = 0.15;
   //     float this->angular_speed = 0.5;
@@ -550,62 +717,7 @@ class Vgraph {
   //
   // }
   //
-  // void translate(goal_distance)
-  // {
-  //     geometry_msgs::Twist move_cmd;
-  //     move_cmd.linear.x = this->linear_speed;
-  //     // need to call get_odom function. Currently assuming we got position and rotation value.
-  //     float x_start = position.x;
-  //     float y_start = position.y;
-  //     float distance = 0;
-  //     while(distance < goal_distance)
-  //     {
-  //         this->cmd_vel.publish(move_cmd);
-  //         // need to call get_odom function. Currently assuming we got position and rotation value.
-  //         distance = sqrt(pow(position.x- x_start, 2) + pow(position.y- y_start, 2))
-  //     }
-  //     move_cmd.linear.x = 0;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  //
-  // }
-  //
-  // void rotate(goal_angle)
-  // {
-  //     geometry_msgs::Twist move_cmd;
-  //     move_cmd.angular.z = this->angular_speed;
-  //     if(goal_angle > 0)
-  //     {
-  //         this->angular_speed = -(this->angular_speed);
-  //     }
-  //
-  //     // need to call get_odom function. Currently assuming we got position and rotation value.
-  //     float last_angle = rotation;
-  //     float turn_angle = 0;
-  //     while(abs(turn_angle + this->angular_tolerance) < abs(goal_angle))
-  //     {
-  //         this->cmd_vel.publish(move_cmd);
-  //         // need to call get_odom function. Currently assuming we got position and rotation value.
-  //         float delta_angle = normalize(rotation - last_angle);
-  //         turn_angle = turn_angle + delta_angle;
-  //         last_angle = rotation;
-  //
-  //     }
-  //     move_cmd.angular.z = 0;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  //
-  //
-  // }
-  //
-  // void get_odom()
-  // {
-  //     geometry_msgs::Point
-  //     try
-  //     {
-  //         this->tf_listener.lookupTransform(this->odom_frame, this->base_frame,ros::Time(0), transform); // Not  able to figure what will be the output of this line. Need to figure something for that.
-  //     }
-  // }
+
   //
   // void shutdown()
   // {
