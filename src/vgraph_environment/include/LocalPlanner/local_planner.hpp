@@ -45,9 +45,9 @@ class Local_Planner
 {
 private:
     std::vector<geometry_msgs::Point> global_path;
-    // std::vector<geometry_msgs::Point> vert_list;
+
     std::vector<std::vector<geometry_msgs::Point>> hull_verts;
-    // double threshold;
+
     double robot_length;
     Robot robot;
      // Ackerman drive

@@ -53,7 +53,6 @@ class AStar {
                 goal_index = previous[goal_index];
                 this->final_path.push_back(this->vertex_list[goal_index]);
             }
-            // this->final_path.push_back(this->vertex_list[goal_index]);
             reverse(this->final_path.begin(), this->final_path.end());
         }
 
@@ -66,8 +65,7 @@ class AStar {
             int start_node_index = n - 2;
             this->pq.push(std::make_pair(heuristic, start_node_index));
             while(!this->pq.empty()){
-                // ROS_INFO(pq.size());
-                // std::cout << pq.size() << std::endl;
+
                 std::pair<double, int> current = this->pq.top();
                 this->pq.pop();
                 int i = current.second;

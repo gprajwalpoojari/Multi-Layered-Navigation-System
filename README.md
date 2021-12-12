@@ -5,7 +5,7 @@ ROS Melodic on Ubuntu 18.04
 
 ## Instructions
 1. Setup package in ROS environment, or setup packas as your ROS environment
-   1. TODO
+   1. Instructions for setting up [ROS Environment](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment)
 2. Make sure the packages under "Main Dependent ROS packages" are installed
 3. cd into your environment and Build the environment with `catkin_make`
 4. Source your environment with `source devel/setup.bash`

@@ -22,17 +22,6 @@
 
 std::pair<int, int> p0;
 
-float normalize_angle(float angle) {
-  float res = angle;
-    while(res > PI) {
-      res = res - 2.0 * PI;
-    }
-    while(res < -PI) {
-        res = res + 2.0 * PI;
-    }
-    return res;
-}
-
 int get_serialized_index(std::vector<std::vector<geometry_msgs::Point>> hull_verts, int i, int j){
   int size{0};
   for (int k = 0; k < i; k++) {
@@ -110,13 +99,6 @@ std::vector<std::vector<std::pair<int, int>>> grow_obstacles (std::vector<std::v
     return grown_obstacles;
 }
 
-// float compute_weight(std::pair<int, int> &e)
-// {
-//     vector<float> a = e.first;
-//     vector<float> b = e.second;
-//     return sqrt(pow(a[0]- b[0], 2) + pow(a[1]- b[1], 2))
-// }
-
 bool verts_equal(std::pair<double, double> &v1, std::pair<double, double> &v2)
 {
     return ((v1.first == v2.first) && (v1.second == v2.second));
@@ -158,15 +140,6 @@ int orientation (std::pair<double, double> a, std::pair<double, double> b, std::
   }
 }
 
-// Given three collinear points p, q, r, the function checks if
-// point q lies on line segment 'pr'
-bool onSegment(std::pair<int, int> p, std::pair<int, int> q, std::pair<int, int> r) {
-    if (q.first <= std::max(p.first, r.first) && q.first >= std::min(p.first, r.first) &&
-        q.second <= std::max(p.second, r.second) && q.second >= std::min(p.second, r.second))
-       return true;
-
-    return false;
-}
 
 // The main function that returns true if line segment 'e1 with points a1 and a2'
 // and 'e2 with points b1 and b2' intersect.
@@ -181,12 +154,12 @@ bool has_intersect(std::pair<geometry_msgs::Point, geometry_msgs::Point> &e1, st
     int o3 = orientation(b1, b2, a1);
     int o4 = orientation(b1, b2, a2);
 
-    if (verts_equal(a1, b1) || verts_equal(a1, b2) || verts_equal(a2, b1) || verts_equal(a2, b2))
+    if (verts_equal(a1, b1) || verts_equal(a1, b2) || verts_equal(a2, b1) || verts_equal(a2, b2)){
         return false;
-
-    if ((o1 != o2) && (o3 != o4))
+    }
+    if ((o1 != o2) && (o3 != o4)){
         return true;
-
+    }
     return false;
 }
 
@@ -225,9 +198,9 @@ int compare(const void *vp1, const void *vp2)
 
    // Find orientation
    int o = orientation(p0, *p1, *p2);
-   if (o == 0)
+   if (o == 0){
      return (distSq(p0, *p2) >= distSq(p0, *p1))? -1 : 1;
-
+   }
    return (o == 2)? -1: 1;
 }
 
@@ -268,8 +241,9 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    for (int i=1; i<n; i++) {
        // Keep removing i while angle of i and i+1 is same
        // with respect to p0
-       while (i < n-1 && orientation(p0, points[i], points[i+1]) == 0)
+       while (i < n-1 && orientation(p0, points[i], points[i+1]) == 0){
           i++;
+       }
        points[m] = points[i];
        m++;  // Update size of modified array
    }
@@ -313,93 +287,13 @@ std::vector<geometry_msgs::Point> convexHull(std::vector<std::pair<int, int>> po
    }
    return vertices;
 }
-tf::StampedTransform get_odom(
-                              std::string odom_frame, 
-                              std::string base_frame)
-{
-      tf::StampedTransform transform;
-      tf::TransformListener tf_listener;
-      // try
-      // {
-      tf_listener.lookupTransform(odom_frame,base_frame, ros::Time(0), transform);
-      // }
-      return transform;
-  }
-
-// void translate( double goal_distance,
-//                 tf::TransformListener tf_listener, 
-//                 std::string odom_frame, 
-//                 std::string base_frame,
-//                 ros::Publisher pub,
-//                 double linear_speed)
-// {
-//       geometry_msgs::Twist move_cmd;
-//       tf::StampedTransform transform;
-//       move_cmd.linear.x = linear_speed;
-//       // need to call get_odom function. Currently assuming we got position and rotation value.
-//       transform = get_odom(tf_listener, odom_frame, base_frame);
-//       double x_start = transform.getOrigin().x();
-//       double y_start = transform.getOrigin().y();
-//       double distance = 0;
-//       ros::Duration duration(.5);
-//       while(distance < goal_distance)
-//       {
-//           pub.publish(move_cmd);
-//           duration.sleep();
-
-//           transform = get_odom(tf_listener, odom_frame, base_frame);
-//           // need to call get_odom function. Currently assuming we got position and rotation value.
-//           distance = sqrt(pow(position.x- transform.getOrigin().x(), 2) + pow(transform.getOrigin().y()- y_start, 2))
-//       }
-//       move_cmd.linear.x = 0;
-//       pub.publish(move_cmd);
-//       ros::Duration(1.0).sleep();
-//       // loop_rate.sleep();
-  
-//   }
-  //
-  // void rotate(goal_angle)
-  // {
-  //     geometry_msgs::Twist move_cmd;
-  //     move_cmd.angular.z = this->angular_speed;
-  //     if(goal_angle > 0)
-  //     {
-  //         this->angular_speed = -(this->angular_speed);
-  //     }
-  //
-  //     // need to call get_odom function. Currently assuming we got position and rotation value.
-  //     float last_angle = rotation;
-  //     float turn_angle = 0;
-  //     while(abs(turn_angle + this->angular_tolerance) < abs(goal_angle))
-  //     {
-  //         this->cmd_vel.publish(move_cmd);
-  //         // need to call get_odom function. Currently assuming we got position and rotation value.
-  //         float delta_angle = normalize(rotation - last_angle);
-  //         turn_angle = turn_angle + delta_angle;
-  //         last_angle = rotation;
-  //
-  //     }
-  //     move_cmd.angular.z = 0;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  //
-  //
-  // }
-  //
 
 void animate_robot ( std::vector<robot_state> robotPath, 
                      ros::Publisher pub,
                      std::string odom_frame, 
                      std::string base_frame){
     ROS_INFO("Animate turtlebot");
-    // pub.publish(m);
-    // tf2::Quaternion q_mark;
-    // while (pub.getNumSubscribers() < 1)
-    // {
-    //     ROS_WARN_ONCE("Please create a subscriber to the marker");
-    //     duration.sleep();
-    // }
-    // pair<point, double (rad)>
+
     geometry_msgs::Point p1;
     geometry_msgs::Point p2;
     geometry_msgs::Twist move_cmd;
@@ -437,40 +331,17 @@ void animate_robot ( std::vector<robot_state> robotPath,
 
         move_cmd.linear.x = lineSpeed;
         move_cmd.angular.z = thetaSpeed;
-        // tf2::Quaternion q_mark;
+
         ROS_INFO("Point (%f,%f) theta: %f", p1.x, p1.y, theta1 );
-        // tf::StampedTransform transform;
-        // tf_listener.lookupTransform(odom_frame, base_frame,ros::Time(0), transform);
-        // m.pose.position.x = p.x;
-        // m.pose.position.y = p.y;
-        // m.pose.position.z = p.z;
-        // q_mark.setRPY(0, 0, theta);
-        // q_mark.normalize();
-        // m.pose.orientation.x = q_mark[0];
-        // m.pose.orientation.y = q_mark[1];
-        // m.pose.orientation.z = q_mark[2];
-        // m.pose.orientation.w = q_mark[3];
 
-
-        // marker_arr.markers.push_back(m);
-        // pub.publish(marker_arr);
         pub.publish(move_cmd);
         duration.sleep();
-        // tf::StampedTransform transform;
-        // transform = get_odom( odom_frame, base_frame);
         // Move point 2 to point 1
         p1 = p2;
         theta1 = theta2;
 
-        // Update with real position
-        // p1.x = transform.getOrigin().x();
-        // p1.y = transform.getOrigin().y();
-
-        // theta1 = 
-
     }
     duration.sleep();
-    // publish();
     return;
 
 }
@@ -482,11 +353,10 @@ class Vgraph {
       ros::NodeHandle n;
       ros::Publisher marker_pub = n.advertise<visualization_msgs::MarkerArray>("vgraph_markerarr", 10);
       ros::Publisher cmd_vel = n.advertise<geometry_msgs::Twist>("/cmd_vel", 5);
-      ros::Rate loop_rate(30);
+      // ros::Rate loop_rate(30);
 
       tf::TransformListener tf_listener;
-      // loop_rate.sleep(2);
-      //
+
       std::string odom_frame = "/odom";
       std::string base_frame;
       tf::StampedTransform transform;
@@ -515,8 +385,7 @@ class Vgraph {
       ROS_INFO("Ros Path: %s",rospath.c_str());
       float scale_factor = 100;
       std::string object_path = rospath+"/src/obstacles.txt";
-      // ROS_INFO("parse object1");
-      // std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
+
       std::vector<std::vector<std::pair<int, int>>> obstacles = load_obstacles(object_path);
       ROS_INFO("parse object2");
 
@@ -525,8 +394,6 @@ class Vgraph {
 
       std::string goal_path = rospath+"/src/goal.txt";
 
-      // ROS_INFO("parse goal: %s",goal_path.c_str());
-      // std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
       std::pair<int, int> goal = load_goal(goal_path);
       std::pair<int, int> start {-200,0};
 
@@ -627,15 +494,7 @@ class Vgraph {
                 int start_index = get_serialized_index(hull_verts, i, k);
                 int end_index = get_serialized_index(hull_verts, j, l);
                 connectivity[start_index].push_back(end_index);
-                connectivity[end_index].push_back(start_index);
-                // if (i < hull_verts[i].size() - 2) {
-                // int z = (j==hull_verts[i].size()-3) ? 0 : k+1;
-                // end_index = get_serialized_index(hull_verts, i, z);
-                // connectivity[start_index].push_back(end_index);
-                // connectivity[end_index].push_back(start_index); 
-                // }
-                
-
+                connectivity[end_index].push_back(start_index);               
               }
             }
           }
@@ -693,7 +552,7 @@ class Vgraph {
 
     visualization_msgs::Marker path_marker_1 = init_marker(marker_id, visualization_msgs::Marker::POINTS);
       marker_id ++;
-      // visualization_msgs::MarkerArray path;
+
       path_marker_1.scale.x = 0.05;
       path_marker_1.color.r = 0;
       path_marker_1.color.g = 0;
@@ -701,37 +560,15 @@ class Vgraph {
       path_marker_1.points = pose;
       marker_arr.markers.push_back(path_marker_1);
 
-      // while (ros::ok) {
+      // Publish path markers
       ros::Duration(2.0).sleep();
       marker_pub.publish(marker_arr);
-      // }
-      // visualization_msgs::Marker robot = init_marker(marker_id, visualization_msgs::Marker::CUBE);
-      // marker_id ++;
+
       // Animate turtlebot
       animate_robot ( path, cmd_vel, odom_frame, base_frame );
 
-  //     float this->linear_speed = 0.15;
-  //     float this->angular_speed = 0.5;
-  //     float this->angular_tolerance = 0.1;
-  //
-  //
-  // }
-  //
-
-  //
-  // void shutdown()
-  // {
-  //     ROS_INFO("Stopping the robot !!");
-  //     geometry_msgs::Twist move_cmd;
-  //     this->cmd_vel.publish(move_cmd);
-  //     loop_rate.sleep();
-  // }
-  //
-
     }
 };
-
-
 
 
 int main(int argc, char** argv)

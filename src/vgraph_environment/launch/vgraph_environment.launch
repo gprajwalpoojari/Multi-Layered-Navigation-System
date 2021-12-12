@@ -1,6 +1,5 @@
 <launch>
   <!-- Bringup a fake turtlebot robot -->
-  <!-- <include file="$(find turtlebot3_fake)/launch/turtlebot3_fake.launch" /> -->
   <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
 
   <param name="tb3_model" value="$(arg model)"/>
@@ -14,9 +13,6 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
     <param name="publish_frequency" type="double" value="50.0" />
   </node>
-
-  <!-- Start a move_base node -->
-  <!-- <include file="$(find rbx1_nav)/launch/fake_move_base_obstacle.launch" /> -->
 
   <!-- Run the map server with our map + obstacles -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find vgraph_environment)/map/map.yaml"/>

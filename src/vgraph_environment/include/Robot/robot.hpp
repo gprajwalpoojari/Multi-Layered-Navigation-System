@@ -56,17 +56,12 @@ public:
 
     void translate()
     {  
-        //  std::cout << this->center << std::endl;
         for(auto &point : this->robot_final_points)
         {
             point.x = point.x + this->center.x;
             point.y = point.y + this->center.y;
             point.z = point.z + this->center.z;
-            // std::cout << point << std::endl;
         }
-        // for (auto i : this->robot_final_points) {
-        //     std::cout << i << std::endl;
-        // }
     }
 
     geometry_msgs::Point get_center(){
@@ -81,24 +76,13 @@ public:
         return this->radius;
     }
 
-    std::vector<geometry_msgs::Point> get_corners(){
-        return this->robot_final_points;
-    }
     void update_robot_pose(geometry_msgs::Point center, double orientation)
     {
         this->center = center;
         this->orientation = orientation;
         this->rotate();
         this->translate();
-        // for (auto i : this->robot_final_points) {
-        //     std::cout << i << std::endl;
-        // }
-        // std::cout << "Next" << std::endl;
-    }
 
-    std::vector<geometry_msgs::Point> get_robot_polygon()
-    {
-        return this->robot_final_points;
     }
 
     double cross_product(std::pair<geometry_msgs::Point, geometry_msgs::Point> line, geometry_msgs::Point point)
@@ -116,72 +100,61 @@ public:
     bool check_collision(std::vector<geometry_msgs::Point> obstacle)
     {
         std::vector<std::vector<geometry_msgs::Point>> polygon = {obstacle, this->robot_final_points};
-        // std::cout << "Robot" << std::endl;
-        // for (auto i : this->robot_final_points) {
-        //     std::cout<< i.x << " " << i.y <<std::endl;
-        // }
-        // std::cout << "obstacle" << std::endl;
-        // for (auto i : obstacle) {
-        //     std::cout << i.x << " " << i.y << std::endl;
-        // }
-        // std::cout << "Center" << std::endl;
-        // std::cout << this->center << std::endl;
-        // std::cout << " Next " << std::endl;
+
         bool COLLISION = false;
         //polygon collision algorithm
         for (int i = 0; i < polygon[0].size(); i++){
             for (int j = 0; j < polygon[1].size(); j++){
-            bool probability[2] = {false}, exception[2] = {false};
-            std::vector<std::pair<geometry_msgs::Point, geometry_msgs::Point>> line(2);
-            int a = (i==polygon[0].size() - 1)? 0 : i+1;
+                bool probability[2] = {false}, exception[2] = {false};
+                std::vector<std::pair<geometry_msgs::Point, geometry_msgs::Point>> line(2);
+                int a = (i==polygon[0].size() - 1)? 0 : i+1;
 
-            line[0] = std::make_pair(polygon[0][i],polygon[0][a]);
-            line[1] = std::make_pair(polygon[1][i],polygon[1][a]);
-            //for each line l in [l1, l2]
-            for (int k = 0; k < 2; k++)
-            {
-                int m = (k==0)? 1: 0;
-                //for each point p in the other line
-                double cross[2];
-                for (int l = 0; l < 2; l++)
+                line[0] = std::make_pair(polygon[0][i],polygon[0][a]);
+                line[1] = std::make_pair(polygon[1][i],polygon[1][a]);
+                //for each line l in [l1, l2]
+                for (int k = 0; k < 2; k++)
                 {
-                    geometry_msgs::Point point = (l==0) ? line[m].first : line[m].second;
-                    cross[l] = cross_product(line[k],point);
-                }
-                //If the two cross products have opposite sign, or one of them is zero
-                if (cross[0] * cross[1] <= 0)
-                {
-                if (cross[0] != 0 || cross[1] != 0)
-                {
-                    probability[k] = true;
-                    //store true value if only one of them is zero
-                    if (cross[0] == 0 || cross[1] == 0)
+                    int m = (k==0)? 1: 0;
+                    //for each point p in the other line
+                    double cross[2];
+                    for (int l = 0; l < 2; l++)
                     {
-                    exception[k] = true;
+                        geometry_msgs::Point point = (l==0) ? line[m].first : line[m].second;
+                        cross[l] = cross_product(line[k],point);
                     }
-                    else{
-                    exception[k] = false;
+                    //If the two cross products have opposite sign, or one of them is zero
+                    if (cross[0] * cross[1] <= 0)
+                        {
+                        if (cross[0] != 0 || cross[1] != 0)
+                        {
+                            probability[k] = true;
+                            //store true value if only one of them is zero
+                            if (cross[0] == 0 || cross[1] == 0)
+                            {
+                            exception[k] = true;
+                            }
+                            else{
+                            exception[k] = false;
+                            }
+                        }
+                        else
+                        {
+                            probability[k] = false;
+                        }
                     }
                 }
-                else
-                {
-                    probability[k] = false;
+                //If both cross product checks above indicated opposite signs,
+                if (probability[0] && probability[1] == true){
+                    //check for atleast one zero cross product in both cases
+                    if (!(exception[0] && exception[1])){
+                        COLLISION = true;
+                        break;
+                    }
                 }
-                }
-            }
-            //If both cross product checks above indicated opposite signs,
-            if (probability[0] && probability[1] == true){
-                //check for atleast one zero cross product in both cases
-                if (!(exception[0] && exception[1])){
-                COLLISION = true;
-                break;
-                }
-            }
             }
         }
 
     return COLLISION;
-}
+    }
 
 };
-
