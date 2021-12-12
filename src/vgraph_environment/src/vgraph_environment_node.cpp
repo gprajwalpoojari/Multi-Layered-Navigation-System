@@ -321,7 +321,7 @@ tf::StampedTransform get_odom(
       tf::TransformListener tf_listener;
       // try
       // {
-      tf_listener.lookupTransform(base_frame,odom_frame, ros::Time(0), transform);
+      tf_listener.lookupTransform(odom_frame,base_frame, ros::Time(0), transform);
       // }
       return transform;
   }
@@ -506,8 +506,10 @@ class Vgraph {
           {
               ROS_ERROR("%s",ex.what());
               ros::Duration(1.0).sleep();
+              base_frame = "/base_link";
           }
       }
+      
       ROS_INFO("Start");
       std::string rospath = ros::package::getPath("vgraph_environment");
       ROS_INFO("Ros Path: %s",rospath.c_str());
