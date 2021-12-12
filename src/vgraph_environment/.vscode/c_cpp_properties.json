@@ -1,0 +1,41 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/devel/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/devel/include/**",
+        "/home/dhruv/image_transport_ws/devel/include/**",
+        "/home/dhruv/webots_ws/devel/include/**",
+        "/home/dhruv/simulation_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/dhruv/simulation_ws/src/ros_navigation_tutorial/astar_ackermann_planner/include/**",
+        "/home/dhruv/image_transport_ws/src/async_web_server_cpp/async_web_server_cpp/include/**",
+        "/home/dhruv/simulation_ws/src/ddynamic_reconfigure/ddynamic_reconfigure/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/src/forward_kinematics/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/src/hw1/include/**",
+        "/home/dhruv/simulation_ws/src/image_proc/include/**",
+        "/home/dhruv/image_transport_ws/src/image_transport_tutorial/image_transport_tutorial/include/**",
+        "/home/dhruv/simulation_ws/src/laser_assembler/laser_assembler/include/**",
+        "/home/dhruv/simulation_ws/src/laser_geometry/include/**",
+        "/home/dhruv/simulation_ws/src/learning_tf2/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Foundation_of_Robotics/Assignment/Solutions/ros_FOR_ws/src/quat_to_euler/include/**",
+        "/home/dhruv/simulation_ws/src/robot_setup_tf/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/turtlebot3_simulations/turtlebot3_fake/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/turtlebot3_simulations/turtlebot3_gazebo/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/turtlebot3/turtlebot3_slam/include/**",
+        "/home/dhruv/simulation_ws/src/turtlebot3_slam_custom/include/**",
+        "/home/dhruv/simulation_ws/src/usb_cam/include/**",
+        "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/include/**",
+        "/home/dhruv/simulation_ws/src/vision_visp/visp_bridge/include/**",
+        "/home/dhruv/image_transport_ws/src/web_video_server/web_video_server/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

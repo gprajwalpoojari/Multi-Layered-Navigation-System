@@ -10,6 +10,7 @@
 #include "visualization_msgs/MarkerArray.h"
 #include "AStar/AStar.hpp"
 #include <ros/package.h>
+#include "LocalPlanner/local_planner.hpp"
 
 #include<iostream>
 #include<fstream>
@@ -88,7 +89,7 @@ std::pair<int, int> load_goal(std::string goal_path) { // parsing the goal.txt f
 std::vector<std::vector<std::pair<int, int>>> grow_obstacles (std::vector<std::vector<std::pair<int, int>>> obstacles){
 
     std::vector<std::vector<std::pair<int, int>>> grown_obstacles(obstacles.size());
-    int aabb_sidelen = 36;
+    int aabb_sidelen = 55;
     int half = aabb_sidelen / 2;
 
     for (int o = 0; o < obstacles.size(); o++){
@@ -346,22 +347,22 @@ class Vgraph {
       //     }
       // }
       ROS_INFO("Start");
-      std::string rospath = ros::package::getPath("vgraph_environment");
-      ROS_INFO("Ros Path: %s",rospath.c_str());
+      // std::string rospath = ros::package::getPath("vgraph_environment");
+      // ROS_INFO("Ros Path: %s",rospath.c_str());
       float scale_factor = 100;
-      std::string object_path = rospath+"/src/obstacles.txt";
-      ROS_INFO("parse object1");
-      // std::string object_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/obstacles.txt";
+      // std::string object_path = rospath+"/src/obstacles.txt";
+      // ROS_INFO("parse object1");
+      std::string object_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/obstacles.txt";
       std::vector<std::vector<std::pair<int, int>>> obstacles = load_obstacles(object_path);
       ROS_INFO("parse object2");
 
 
       std::vector<std::vector<std::pair<int, int>>> grown_obstacles = grow_obstacles(obstacles);
 
-      std::string goal_path = rospath+"/src/goal.txt";
+      // std::string goal_path = rospath+"/src/goal.txt";
 
-      ROS_INFO("parse goal: %s",goal_path.c_str());
-      // std::string goal_path = "/home/prajwal/Desktop/rbe500-ros/src/vgraph_environment/src/goal.txt";
+      // ROS_INFO("parse goal: %s",goal_path.c_str());
+      std::string goal_path = "/home/dhruv/Documents/WPI_Courses/Motion_Planning/mp_project_ws/src/Multi_Layer_Motion_Planning/src/vgraph_environment/src/goal.txt";
       std::pair<int, int> goal = load_goal(goal_path);
       std::pair<int, int> start {-200,0};
 
@@ -463,10 +464,26 @@ class Vgraph {
                 int end_index = get_serialized_index(hull_verts, j, l);
                 connectivity[start_index].push_back(end_index);
                 connectivity[end_index].push_back(start_index);
+                // if (i < hull_verts[i].size() - 2) {
+                // int z = (j==hull_verts[i].size()-3) ? 0 : k+1;
+                // end_index = get_serialized_index(hull_verts, i, z);
+                // connectivity[start_index].push_back(end_index);
+                // connectivity[end_index].push_back(start_index); 
+                // }
+                
 
               }
             }
           }
+        }
+      }
+      for (int i = 0; i < hull_verts.size() - 2; i++) {
+        for (int j = 0; j < hull_verts[i].size(); j++) {
+          int k = (j == hull_verts[i].size() - 1) ? 0 : j+1;
+          int start_index = get_serialized_index(hull_verts, i, j);
+          int end_index = get_serialized_index(hull_verts, i, k);
+          connectivity[start_index].push_back(end_index);
+          connectivity[end_index].push_back(start_index); 
         }
       }
       marker.points = points;
@@ -477,18 +494,50 @@ class Vgraph {
 //Global Planner - AStar Algorithm
 
       AStar astar(start_point, goal_point, vertex_list, connectivity);
-      // astar.show_connectivity();
       astar.calculate_path();
       std::vector<geometry_msgs::Point> final_path = astar.get_final_path();
       visualization_msgs::Marker path_marker = init_marker(marker_id, visualization_msgs::Marker::LINE_STRIP);
       marker_id ++;
-      // visualization_msgs::MarkerArray path;
       path_marker.scale.x = 0.05;
       path_marker.color.r = 1;
       path_marker.color.g = 0;
       path_marker.color.b = 0;
       path_marker.points = final_path;
       marker_arr.markers.push_back(path_marker);
+
+    hull_verts.pop_back();
+    hull_verts.pop_back();
+
+    std::vector<std::vector<geometry_msgs::Point>> obstacles_new_type(hull_verts.size());
+    for (int i = 0; i < obstacles.size(); i++){
+      for (int j = 0; j < obstacles[i].size(); j++) {
+        geometry_msgs::Point new_pt;
+        new_pt.x = obstacles[i][j].first;
+        new_pt.y = obstacles[i][j].second;
+        new_pt.z = 0;
+        obstacles_new_type[i].push_back(new_pt);
+      }
+
+    }
+    Local_Planner local_planner(final_path, obstacles_new_type);
+    std::vector<robot_state> path = local_planner.get_path();
+    std::vector<geometry_msgs::Point> pose;
+    for(auto state : path)
+    {
+      pose.push_back(state.first);
+    }
+
+    visualization_msgs::Marker path_marker_1 = init_marker(marker_id, visualization_msgs::Marker::POINTS);
+      marker_id ++;
+      // visualization_msgs::MarkerArray path;
+      path_marker_1.scale.x = 0.05;
+      path_marker_1.color.r = 0;
+      path_marker_1.color.g = 0;
+      path_marker_1.color.b = 1;
+      path_marker_1.points = pose;
+      marker_arr.markers.push_back(path_marker_1);
+
+
       while (ros::ok) {
         marker_pub.publish(marker_arr);
       }
