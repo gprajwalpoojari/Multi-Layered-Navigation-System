@@ -1,5 +1,8 @@
 # Multi_Layer_Motion_Planning
 
+## Results
+![motion-planning](https://github.com/gprajwalpoojari/Multi_Layer_Motion_Planning/assets/53962958/5c0f571f-0287-4ff1-ab72-b2269cc7db24)
+
 ## Environment
 ROS Melodic on Ubuntu 18.04
 
@@ -11,7 +14,7 @@ ROS Melodic on Ubuntu 18.04
 4. Source your environment with `source devel/setup.bash`
 5. Run the ROS package with `roslaunch vgraph_environment vgraph_environment.launch`
 
-## Main Dependent ROS packages for "vgraph_environment"
+## Dependent ROS packages for "vgraph_environment"
 - rospy
 - roscpp
 - roslib
@@ -20,7 +23,7 @@ ROS Melodic on Ubuntu 18.04
 - turtlebot3_fake
 
 
-## Result
+## Brief explanation of the approach
 
 - Obstacle Avoidance using Visibility Graph Construction
 - Global Planner - A-Star
