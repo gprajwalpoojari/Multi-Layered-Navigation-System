@@ -1,4 +1,4 @@
-# Multi_Layer_Motion_Planning
+# Multi Layered Navigation System for Non-Holonomic Vehicles
 
 ## Results
 Example animation of the result:
