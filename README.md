@@ -1,6 +1,6 @@
 # Multi Layered Navigation System for Non-Holonomic Vehicles
 
-## Results
+## Demo
 Example animation of the result:
 
 ![motion-planning](https://github.com/gprajwalpoojari/Multi_Layer_Motion_Planning/assets/53962958/5c0f571f-0287-4ff1-ab72-b2269cc7db24)
